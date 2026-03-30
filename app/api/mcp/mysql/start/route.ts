@@ -10,16 +10,13 @@ interface MCPProcessInfo {
   startedAt: string;
 }
 
-// Global map to store running MCP server processes
 const mcpProcesses = new Map<string, MCPProcessInfo>();
 
 export async function POST(request: NextRequest) {
   try {
-    // Parse request body
     const body = await request.json();
     const { host, port, username, password, database } = body;
 
-    // Validate required fields
     if (!host || !port || !username || !database) {
       return NextResponse.json(
         { error: "All fields are required: host, port, username, database" },
@@ -27,7 +24,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if MySQL MCP server is already running
     const processKey = `mysql_${host}_${port}_${database}`;
     if (mcpProcesses.has(processKey)) {
       return NextResponse.json(
@@ -36,28 +32,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build argument list dynamically
     const args = [
         "-y",
-        "@modelcontextprotocol/server-mysql",
+        "@matpb/mysql-mcp-server",
         "--host", host,
         "--port", port.toString(),
         "--user", username,
         "--database", database,
     ];
 
-    // Add password only if provided
     if (password && password.trim() !== "") {
-        args.push("--password", password);
+      args.push("--password", password);
     }
 
-    // Spawn MySQL MCP server process
     const mcpServer = spawn("npx", args, {
-        shell: true, // Required for Windows compatibility
-        stdio: ["pipe", "pipe", "pipe"],
+      shell: true,
+      stdio: ["pipe", "pipe", "pipe"],
     });
 
-    // Store process information
     mcpProcesses.set(processKey, {
       pid: mcpServer.pid,
       process: mcpServer,
@@ -67,7 +59,6 @@ export async function POST(request: NextRequest) {
       startedAt: new Date().toISOString(),
     });
 
-    // Handle process events
     mcpServer.on("error", (error) => {
       console.error(`MySQL MCP server error:`, error);
       mcpProcesses.delete(processKey);
@@ -78,7 +69,6 @@ export async function POST(request: NextRequest) {
       mcpProcesses.delete(processKey);
     });
 
-    // Log stdout/stderr for debugging
     mcpServer.stdout?.on("data", (data) => {
       console.log(`MySQL MCP stdout: ${data}`);
     });
@@ -95,7 +85,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error starting MySQL MCP server:", error);
-    
+
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : "Failed to start MySQL MCP server",
@@ -105,7 +95,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET endpoint to check server status
 export async function GET() {
   const runningProcesses = Array.from(mcpProcesses.entries()).map(
     ([key, value]) => ({
@@ -124,7 +113,6 @@ export async function GET() {
   });
 }
 
-// DELETE endpoint to stop a server
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -145,7 +133,6 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Kill the process
     processInfo.process.kill();
     mcpProcesses.delete(processKey);
 
@@ -155,7 +142,7 @@ export async function DELETE(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error stopping MySQL MCP server:", error);
-    
+
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : "Failed to stop MySQL MCP server",

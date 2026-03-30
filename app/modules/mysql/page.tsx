@@ -283,7 +283,7 @@ export default function MySQLConfigurePage() {
                   Connecting...
                 </span>
               ) : (
-                "Submit"
+                "Start MCP Server"
               )}
             </button>
           </form>
