@@ -144,7 +144,7 @@ export class MCPClient {
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async executeQuery(query: string): Promise<any> {
-    return this.callTool("execute_query", { sql: query });
+    return this.callTool("execute_query", { query });
   }
 
 
