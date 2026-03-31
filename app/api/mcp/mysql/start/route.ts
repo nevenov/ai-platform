@@ -1,16 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { spawn, ChildProcess } from "child_process";
-
-interface MCPProcessInfo {
-  pid: number | undefined;
-  process: ChildProcess;
-  host: string;
-  port: number;
-  database: string;
-  startedAt: string;
-}
-
-const mcpProcesses = new Map<string, MCPProcessInfo>();
+import { startMCPClient, isMCPClientRunning, resetMCPClient } from "@/lib/mcp";
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,64 +13,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const processKey = `mysql_${host}_${port}_${database}`;
-    if (mcpProcesses.has(processKey)) {
+    if (isMCPClientRunning()) {
       return NextResponse.json(
-        { error: "MySQL MCP server is already running for this configuration" },
+        { error: "MySQL MCP server is already running" },
         { status: 409 }
       );
     }
 
-    const args = [
-        "-y",
-        "@matpb/mysql-mcp-server",
-        "--host", host,
-        "--port", port.toString(),
-        "--user", username,
-        "--database", database,
-    ];
-
-    if (password && password.trim() !== "") {
-      args.push("--password", password);
-    }
-
-    const mcpServer = spawn("npx", args, {
-      shell: true,
-      stdio: ["pipe", "pipe", "pipe"],
-    });
-
-    mcpProcesses.set(processKey, {
-      pid: mcpServer.pid,
-      process: mcpServer,
+    const client = await startMCPClient({
       host,
-      port,
+      port: port.toString(),
+      username,
+      password,
       database,
-      startedAt: new Date().toISOString(),
-    });
-
-    mcpServer.on("error", (error) => {
-      console.error(`MySQL MCP server error:`, error);
-      mcpProcesses.delete(processKey);
-    });
-
-    mcpServer.on("exit", (code, signal) => {
-      console.log(`MySQL MCP server exited with code ${code} and signal ${signal}`);
-      mcpProcesses.delete(processKey);
-    });
-
-    mcpServer.stdout?.on("data", (data) => {
-      console.log(`MySQL MCP stdout: ${data}`);
-    });
-
-    mcpServer.stderr?.on("data", (data) => {
-      console.error(`MySQL MCP stderr: ${data}`);
     });
 
     return NextResponse.json({
       success: true,
       message: "MySQL MCP server started successfully",
-      pid: mcpServer.pid,
-      processKey,
+      connected: await client.ping(),
     });
   } catch (error) {
     console.error("Error starting MySQL MCP server:", error);
@@ -96,45 +46,14 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
-  const runningProcesses = Array.from(mcpProcesses.entries()).map(
-    ([key, value]) => ({
-      processKey: key,
-      pid: value.pid,
-      host: value.host,
-      port: value.port,
-      database: value.database,
-      startedAt: value.startedAt,
-    })
-  );
-
   return NextResponse.json({
-    running: runningProcesses.length > 0,
-    processes: runningProcesses,
+    running: isMCPClientRunning(),
   });
 }
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE() {
   try {
-    const { searchParams } = new URL(request.url);
-    const processKey = searchParams.get("processKey");
-
-    if (!processKey) {
-      return NextResponse.json(
-        { error: "processKey parameter is required" },
-        { status: 400 }
-      );
-    }
-
-    const processInfo = mcpProcesses.get(processKey);
-    if (!processInfo) {
-      return NextResponse.json(
-        { error: "Process not found" },
-        { status: 404 }
-      );
-    }
-
-    processInfo.process.kill();
-    mcpProcesses.delete(processKey);
+    resetMCPClient();
 
     return NextResponse.json({
       success: true,

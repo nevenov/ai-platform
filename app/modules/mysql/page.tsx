@@ -73,7 +73,6 @@ export default function MySQLConfigurePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-zinc-950 dark:to-black">
       <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
-        {/* Back Button */}
         <Link
           href="/modules"
           className="mb-8 inline-flex items-center text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
@@ -94,7 +93,6 @@ export default function MySQLConfigurePage() {
           Back to Modules
         </Link>
 
-        {/* Header */}
         <div className="mb-12">
           <div className="mb-4 flex items-center gap-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 text-4xl shadow-lg">
@@ -111,7 +109,6 @@ export default function MySQLConfigurePage() {
           </div>
         </div>
 
-        {/* Configuration Form */}
         <div className="rounded-2xl bg-white p-8 shadow-xl dark:bg-zinc-900">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Host Field */}
@@ -134,7 +131,6 @@ export default function MySQLConfigurePage() {
               />
             </div>
 
-            {/* Port Field */}
             <div>
               <label
                 htmlFor="port"
@@ -154,7 +150,6 @@ export default function MySQLConfigurePage() {
               />
             </div>
 
-            {/* Username Field */}
             <div>
               <label
                 htmlFor="username"
@@ -174,7 +169,6 @@ export default function MySQLConfigurePage() {
               />
             </div>
 
-            {/* Password Field */}
             <div>
               <label
                 htmlFor="password"
@@ -193,7 +187,6 @@ export default function MySQLConfigurePage() {
               />
             </div>
 
-            {/* Database Field */}
             <div>
               <label
                 htmlFor="database"
@@ -253,7 +246,30 @@ export default function MySQLConfigurePage() {
               </div>
             )}
 
-            {/* Submit Button */}
+            {message?.type === "success" && (
+                <div className="mt-6">
+                  <Link
+                    href="/modules/mysql/explorer"
+                    className="inline-flex items-center rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 px-6 py-3 text-white font-semibold shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                  >
+                    Go to MySQL Explorer
+                    <svg
+                        className="ml-2 h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                        />
+                    </svg>
+                  </Link>
+                </div>
+            )}
+
             <button
               type="submit"
               disabled={isLoading}
