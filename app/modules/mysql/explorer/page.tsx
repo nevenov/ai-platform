@@ -473,7 +473,7 @@ export default function MySQLExplorerPage() {
           Load Tables
         </button>
 
-        <div className="mt-4">
+        {/* <div className="mt-4">
           <h3 className="font-semibold mb-2 text-gray-300">Tables</h3>
           <ul className="space-y-1 max-h-64 overflow-y-auto">
             {tables.map((t) => (
@@ -492,7 +492,7 @@ export default function MySQLExplorerPage() {
               </li>
             ))}
           </ul>
-        </div>
+        </div> */}
       </div>
 
       {/* MAIN PANEL */}

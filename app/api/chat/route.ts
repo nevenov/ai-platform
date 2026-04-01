@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAIClient } from "@/lib/ai";
-import { executeSQL } from "@/lib/sql";
+import {
+  executeToolsAndFormatResults,
+  type ClaudeMessage,
+} from "@/lib/tool-orchestration";
 
 interface Message {
   role: "user" | "assistant";
@@ -26,76 +29,104 @@ export async function POST(request: NextRequest) {
 
     console.log("[Chat] Processing message:", message.slice(0, 100));
 
-    // Build conversation history
-    const conversationHistory: Message[] = [
-      ...(Array.isArray(history) ? history : []),
-      { role: "user", content: message },
-    ];
-
     // Get AI client
     const aiClient = getAIClient();
 
-    // Step 1: Send initial message to Claude
-    let aiResponse = await aiClient.chatWithTools(conversationHistory);
+    // Build initial conversation
+    const conversationHistory = Array.isArray(history) ? history : [];
+    const currentMessages: ClaudeMessage[] = [
+      ...conversationHistory.map((msg: Message) => ({
+        role: msg.role as "user" | "assistant",
+        content: msg.content,
+      })),
+      { role: "user" as const, content: message },
+    ];
 
+    // Step 1: Send initial message to Claude
+    let aiResponse = await aiClient.chatWithTools(currentMessages);
     console.log("[Chat] AI stop reason:", aiResponse.stopReason);
 
-    // Step 2: Handle tool calls (SQL execution)
-    if (aiResponse.toolCalls && aiResponse.toolCalls.length > 0) {
-      console.log(
-        `[Chat] Processing ${aiResponse.toolCalls.length} tool call(s)`
+    // Step 2: Loop to handle multiple rounds of tool calls
+    const maxRounds = 10; // Allow more rounds for complex multi-table queries
+    let round = 0;
+
+    while (aiResponse.stopReason === "tool_use" && round < maxRounds) {
+      round++;
+      const toolUseBlocks = aiResponse.content.filter(
+        (block) => block.type === "tool_use"
       );
 
-      // Execute tool calls and collect results
-      const toolResults: string[] = [];
+      if (toolUseBlocks.length === 0) break;
 
-      for (const toolCall of aiResponse.toolCalls) {
-        if (toolCall.name === "execute_sql_query") {
-          const query = toolCall.input.query as string;
-          const reasoning = toolCall.input.reasoning as string;
+      console.log(
+        `[Chat] Round ${round}: Processing ${toolUseBlocks.length} tool call(s)`
+      );
 
-          console.log("[Chat] Tool reasoning:", reasoning);
-          console.log("[Chat] Executing SQL:", query.slice(0, 100));
+      // Execute tools and get results
+      const toolResults = await executeToolsAndFormatResults(
+        aiResponse.content
+      );
 
-          // Execute SQL with safety checks
-          const sqlResult = await executeSQL(query);
+      console.log(
+        `[Chat] Round ${round}: Generated ${toolResults.length} tool results`
+      );
 
-          // Format result for AI
-          let resultText = sqlResult.summary;
-          if (sqlResult.data) {
-            resultText += "\n\n" + sqlResult.data;
-          }
-          if (sqlResult.error) {
-            resultText += "\n\nError: " + sqlResult.error;
-          }
-
-          toolResults.push(resultText);
-        }
-      }
-
-      // Step 3: Send tool results back to Claude for final response
-      conversationHistory.push({
+      // Add assistant message with tool_use blocks
+      currentMessages.push({
         role: "assistant",
-        content: aiResponse.response || "I'll analyze the data...",
+        content: aiResponse.content,
       });
 
-      conversationHistory.push({
+      // Add user message with tool_result blocks
+      currentMessages.push({
         role: "user",
-        content:
-          "Tool execution results:\n\n" +
-          toolResults.join("\n\n---\n\n") +
-          "\n\nPlease analyze these results and provide a clear answer to my question.",
+        content: toolResults,
       });
 
-      // Get final response from Claude
-      aiResponse = await aiClient.chatWithTools(conversationHistory);
+      // Get next response from Claude
+      aiResponse = await aiClient.chatWithTools(currentMessages);
+      console.log(`[Chat] Round ${round} stop reason:`, aiResponse.stopReason);
+    }
+
+    console.log("[Chat] Final stop reason:", aiResponse.stopReason);
+
+    // Extract text response from content blocks
+    const textBlocks = aiResponse.content.filter(
+      (block) => block.type === "text"
+    );
+    let finalResponse =
+      textBlocks.map((block) => block.text).join("\n") ||
+      aiResponse.response ||
+      "";
+
+    // Handle max rounds reached
+    if (round >= maxRounds && aiResponse.stopReason === "tool_use") {
+      console.warn(
+        "[Chat] Max tool calling rounds reached - query was very complex"
+      );
+      if (finalResponse.trim()) {
+        finalResponse +=
+          "\n\n---\n\n⚠️ This query was complex and reached the computation limit. " +
+          "The partial results above have been generated. Try breaking your question into smaller parts for complete results.";
+      } else {
+        finalResponse =
+          "This query was too complex and exceeded the maximum number of computation rounds. " +
+          "Please try breaking it into smaller, more specific questions. For example:\n" +
+          "- First ask about the table structure\n" +
+          "- Then ask about specific data you need";
+      }
+    }
+
+    // Fallback if still no response
+    if (!finalResponse.trim()) {
+      finalResponse = "I'm sorry, I couldn't generate a response.";
     }
 
     // Return final response
     return NextResponse.json({
       success: true,
-      message: aiResponse.response || "I'm sorry, I couldn't generate a response.",
-      toolsUsed: aiResponse.toolCalls ? aiResponse.toolCalls.length : 0,
+      message: finalResponse,
+      toolRounds: round,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

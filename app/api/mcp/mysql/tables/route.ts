@@ -3,7 +3,7 @@ import { getMCPClient } from "@/lib/mcp";
 
 export async function GET() {
   try {
-    const client = getMCPClient();
+    const client = await getMCPClient();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const raw: any = await client.callTool("show_tables", {});

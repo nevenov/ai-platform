@@ -37,14 +37,43 @@ export async function executeSQL(query: string): Promise<SQLExecutionResult> {
   );
 
   // Step 2: Get MCP client
-  const mcpClient = getMCPClient();
+  const mcpClient = await getMCPClient();
 
   try {
     // Step 3: Execute query via MCP
     const result = await mcpClient.executeQuery(query);
 
+    // Parse MCP response format
+    const mcpData = result as {
+      result?: {
+        content?: Array<{ type: string; text?: string }>;
+      };
+    };
+
+    const textContent = mcpData.result?.content?.find(
+      (c) => c.type === "text"
+    )?.text;
+
+    if (!textContent) {
+      return {
+        success: false,
+        error: "No response from MCP server",
+        summary: "MCP server returned empty response",
+      };
+    }
+
+    // Parse the JSON inside the text content
+    const parsed = JSON.parse(textContent);
+
+    // Transform MCP format to our format
+    const transformedResult = {
+      rows: parsed.data || [],
+      rowCount: parsed.rowCount || (parsed.data ? parsed.data.length : 0),
+      error: parsed.success === false ? parsed.message : undefined,
+    };
+
     // Step 4: Format results
-    const formatted = formatSQLResults(result);
+    const formatted = formatSQLResults(transformedResult);
 
     console.log(
       `[SQL] Query completed: ${formatted.rowCount || 0} rows returned`
@@ -71,7 +100,7 @@ export async function testConnection(): Promise<{
   message: string;
 }> {
   try {
-    const mcpClient = getMCPClient();
+    const mcpClient = await getMCPClient();
     const isConnected = await mcpClient.ping();
 
     if (isConnected) {

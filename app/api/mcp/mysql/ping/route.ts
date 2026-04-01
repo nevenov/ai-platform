@@ -3,7 +3,7 @@ import { getMCPClient } from "@/lib/mcp";
 
 export async function GET() {
   try {
-    const client = getMCPClient();
+    const client = await getMCPClient();
     const ok = await client.ping();
 
     return NextResponse.json({ ok });

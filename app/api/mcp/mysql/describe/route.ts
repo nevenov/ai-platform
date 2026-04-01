@@ -13,7 +13,7 @@ export async function GET(req: Request) {
       );
     }
 
-    const client = getMCPClient();
+    const client = await getMCPClient();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const raw: any = await client.callTool("describe_table", { table });

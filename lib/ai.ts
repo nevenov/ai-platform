@@ -3,11 +3,6 @@
  * Handles communication with Anthropic's Claude API
  */
 
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-}
-
 interface ClaudeMessage {
   role: "user" | "assistant";
   content: string | ContentBlock[];
@@ -96,7 +91,7 @@ export class ClaudeClient {
    * Send a message to Claude with tool support
    */
   async sendMessage(
-    messages: Message[],
+    messages: ClaudeMessage[],
     options?: {
       tools?: Tool[];
       maxTokens?: number;
@@ -107,16 +102,10 @@ export class ClaudeClient {
       throw new Error("ANTHROPIC_API_KEY is not configured");
     }
 
-    // Convert messages to Claude format
-    const claudeMessages: ClaudeMessage[] = messages.map((msg) => ({
-      role: msg.role,
-      content: msg.content,
-    }));
-
     const requestBody = {
       model: this.model,
       max_tokens: options?.maxTokens || 4096,
-      messages: claudeMessages,
+      messages: messages,
       ...(options?.tools && { tools: options.tools }),
       ...(options?.systemPrompt && { system: options.systemPrompt }),
     };
@@ -141,41 +130,48 @@ export class ClaudeClient {
 
   /**
    * Chat with tools enabled (for SQL execution)
+   * Supports multi-turn tool calling with proper Claude format
    */
-  async chatWithTools(messages: Message[]): Promise<{
+  async chatWithTools(
+    messages: ClaudeMessage[],
+    systemPrompt?: string
+  ): Promise<{
     response: string;
-    toolCalls?: Array<{ name: string; input: Record<string, unknown> }>;
+    content: ContentBlock[];
     stopReason: string;
   }> {
-    const systemPrompt =
+    const defaultSystemPrompt =
       "You are a helpful AI assistant with access to a MySQL database. " +
-      "When users ask questions about data, use the execute_sql_query tool to retrieve information. " +
-      "Always explain your SQL queries and format results in a user-friendly way. " +
-      "If you're unsure about the database schema, ask the user or query SHOW TABLES / DESCRIBE to learn more.";
+      "When users ask questions about data, use the execute_sql_query tool efficiently. " +
+      "\n\n🎯 OPTIMIZATION RULES (CRITICAL):\n" +
+      "1. **Make educated guesses** - Try the query directly first with common column names\n" +
+      "2. **Minimize schema checks** - Only use DESCRIBE/SHOW TABLES if a query fails\n" +
+      "3. **Use simple SQL** - Avoid complex JOINs/CASE when a simple SELECT works\n" +
+      "4. **Common column patterns:**\n" +
+      "   - Dates: date_of_birth, created_at, updated_at\n" +
+      "   - IDs: id, patient_id, clinic_id, provider_id\n" +
+      "   - Names: first_name, last_name, name\n" +
+      "   - Foreign keys usually match table names: clinic_id → clinic table\n" +
+      "5. **Recovery strategy:** If 0 rows on WHERE clause, then DESCRIBE to verify columns\n" +
+      "\n📊 Format results with clear markdown tables and concise analysis.";
 
     const claudeResponse = await this.sendMessage(messages, {
       tools: [SQL_TOOL],
-      systemPrompt,
+      systemPrompt: systemPrompt || defaultSystemPrompt,
+      maxTokens: 4096,
     });
 
-    // Extract text and tool calls from response
+    // Extract text from response
     let responseText = "";
-    const toolCalls: Array<{ name: string; input: Record<string, unknown> }> = [];
-
     for (const block of claudeResponse.content) {
       if (block.type === "text" && block.text) {
         responseText += block.text;
-      } else if (block.type === "tool_use" && block.name && block.input) {
-        toolCalls.push({
-          name: block.name,
-          input: block.input,
-        });
       }
     }
 
     return {
       response: responseText.trim(),
-      toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
+      content: claudeResponse.content,
       stopReason: claudeResponse.stop_reason,
     };
   }
