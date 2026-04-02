@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Link from "next/link";
+import DashboardLayout from "@/components/DashboardLayout";
 
 interface Message {
   id: string;
@@ -87,111 +87,83 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex h-screen flex-col bg-zinc-50 dark:bg-zinc-950">
-      {/* Header */}
-      <header className="border-b border-zinc-200 bg-white px-4 py-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="mx-auto flex max-w-4xl items-center justify-between">
-          <Link
-            href="/modules"
-            className="inline-flex items-center text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-          >
-            <svg
-              className="mr-2 h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-            Back
-          </Link>
-          <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-            AI Chat
-          </h1>
-          <div className="w-16" /> {/* Spacer for centering */}
-        </div>
-      </header>
-
-      {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-4xl px-4 py-6">
-          {messages.length === 0 ? (
-            <div className="flex h-full items-center justify-center">
-              <div className="text-center">
-                <div className="mb-4 text-6xl">💬</div>
-                <h2 className="mb-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-                  Start a conversation
-                </h2>
-                <p className="text-zinc-600 dark:text-zinc-400">
-                  Type a message below to begin chatting with AI
-                </p>
+    <DashboardLayout>
+      <div className="flex h-[calc(100vh-2rem)] flex-col">
+        {/* Messages Container */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="mx-auto max-w-4xl px-4 py-6">
+            {messages.length === 0 ? (
+              <div className="flex h-full items-center justify-center">
+                <div className="text-center">
+                  <div className="mb-4 text-6xl">💬</div>
+                  <h2 className="mb-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+                    Start a conversation
+                  </h2>
+                  <p className="text-zinc-600 dark:text-zinc-400">
+                    Type a message below to begin chatting with AI
+                  </p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${
-                    message.role === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
+            ) : (
+              <div className="space-y-4">
+                {messages.map((message) => (
                   <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                      message.role === "user"
-                        ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
-                        : "bg-white text-zinc-900 shadow-md dark:bg-zinc-800 dark:text-zinc-50"
+                    key={message.id}
+                    className={`flex ${
+                      message.role === "user" ? "justify-end" : "justify-start"
                     }`}
                   >
-                    <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
-                      {message.content}
-                    </p>
-                    <span
-                      className={`mt-1 block text-xs ${
+                    <div
+                      className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                         message.role === "user"
-                          ? "text-blue-100"
-                          : "text-zinc-500 dark:text-zinc-400"
+                          ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+                          : "bg-white text-zinc-900 shadow-md dark:bg-zinc-800 dark:text-zinc-50"
                       }`}
                     >
-                      {message.timestamp.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
-                  </div>
-                </div>
-              ))}
-
-              {/* Loading indicator */}
-              {isLoading && (
-                <div className="flex justify-start">
-                  <div className="max-w-[80%] rounded-2xl bg-white px-4 py-3 shadow-md dark:bg-zinc-800">
-                    <div className="flex items-center space-x-2">
-                      <div className="h-2 w-2 animate-bounce rounded-full bg-zinc-400 [animation-delay:-0.3s]" />
-                      <div className="h-2 w-2 animate-bounce rounded-full bg-zinc-400 [animation-delay:-0.15s]" />
-                      <div className="h-2 w-2 animate-bounce rounded-full bg-zinc-400" />
+                      <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+                        {message.content}
+                      </p>
+                      <span
+                        className={`mt-1 block text-xs ${
+                          message.role === "user"
+                            ? "text-blue-100"
+                            : "text-zinc-500 dark:text-zinc-400"
+                        }`}
+                      >
+                        {message.timestamp.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
                     </div>
                   </div>
-                </div>
-              )}
+                ))}
 
-              <div ref={messagesEndRef} />
-            </div>
-          )}
+                {/* Loading indicator */}
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="max-w-[80%] rounded-2xl bg-white px-4 py-3 shadow-md dark:bg-zinc-800">
+                      <div className="flex items-center space-x-2">
+                        <div className="h-2 w-2 animate-bounce rounded-full bg-zinc-400 [animation-delay:-0.3s]" />
+                        <div className="h-2 w-2 animate-bounce rounded-full bg-zinc-400 [animation-delay:-0.15s]" />
+                        <div className="h-2 w-2 animate-bounce rounded-full bg-zinc-400" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Input Form */}
-      <div className="border-t border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-900">
-        <form
-          onSubmit={handleSubmit}
-          className="mx-auto flex max-w-4xl items-end gap-3"
-        >
+        {/* Input Form */}
+        <div className="border-t border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-900">
+          <form
+            onSubmit={handleSubmit}
+            className="mx-auto flex max-w-4xl items-end gap-3"
+          >
           <div className="flex-1">
             <textarea
               value={input}
@@ -257,6 +229,7 @@ export default function ChatPage() {
           Press Enter to send, Shift + Enter for new line
         </p>
       </div>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
