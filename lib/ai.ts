@@ -70,21 +70,28 @@ const SQL_TOOL: Tool = {
 };
 
 /**
- * Claude AI Client
+ * Claude AI Client with Hybrid Model Support
  */
 export class ClaudeClient {
   private apiKey: string;
   private model: string;
+  private toolModel: string; // Cheaper model for tool calling
 
-  constructor(apiKey?: string, model = "claude-sonnet-4-20250514") {
+  constructor(apiKey?: string, model = "claude-sonnet-4-6") {
     this.apiKey = apiKey || process.env.ANTHROPIC_API_KEY || "";
     this.model = model;
+    // Use Haiku 4.5 for tool calling (fastest with near-frontier intelligence)
+    this.toolModel = process.env.CLAUDE_TOOL_MODEL || "claude-haiku-4-5";
 
     if (!this.apiKey) {
       console.warn(
         "[AI] Warning: ANTHROPIC_API_KEY not set. AI features will not work."
       );
     }
+
+    console.log(
+      `[AI] Models: Analysis=${this.model}, ToolCalling=${this.toolModel}`
+    );
   }
 
   /**
@@ -96,14 +103,17 @@ export class ClaudeClient {
       tools?: Tool[];
       maxTokens?: number;
       systemPrompt?: string;
+      model?: string; // Allow model override
     }
   ): Promise<ClaudeResponse> {
     if (!this.apiKey) {
       throw new Error("ANTHROPIC_API_KEY is not configured");
     }
 
+    const modelToUse = options?.model || this.model;
+
     const requestBody = {
-      model: this.model,
+      model: modelToUse,
       max_tokens: options?.maxTokens || 4096,
       messages: messages,
       ...(options?.tools && { tools: options.tools }),
@@ -134,7 +144,8 @@ export class ClaudeClient {
    */
   async chatWithTools(
     messages: ClaudeMessage[],
-    systemPrompt?: string
+    systemPrompt?: string,
+    overrideModel?: string // Allow switching between Haiku/Sonnet per round
   ): Promise<{
     response: string;
     content: ContentBlock[];
@@ -155,10 +166,13 @@ export class ClaudeClient {
       "5. **Recovery strategy:** If 0 rows on WHERE clause, then DESCRIBE to verify columns\n" +
       "\n📊 Format results with clear markdown tables and concise analysis.";
 
+    const modelToUse = overrideModel || this.toolModel;
+
     const claudeResponse = await this.sendMessage(messages, {
       tools: [SQL_TOOL],
       systemPrompt: systemPrompt || defaultSystemPrompt,
       maxTokens: 4096,
+      model: modelToUse,
     });
 
     // Extract text from response

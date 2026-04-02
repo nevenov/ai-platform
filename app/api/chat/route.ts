@@ -42,9 +42,19 @@ export async function POST(request: NextRequest) {
       { role: "user" as const, content: message },
     ];
 
-    // Step 1: Send initial message to Claude
-    let aiResponse = await aiClient.chatWithTools(currentMessages);
+    // Adaptive model configuration
+    const haikuModel = "claude-haiku-4-5"; // Fast & cheap for initial rounds
+    const sonnetModel = "claude-sonnet-4-6"; // Powerful for complex recovery
+    const switchRound = 5; // Switch to Sonnet after round 4
+
+    // Step 1: Send initial message to Claude (use Haiku)
+    let aiResponse = await aiClient.chatWithTools(
+      currentMessages,
+      undefined,
+      haikuModel
+    );
     console.log("[Chat] AI stop reason:", aiResponse.stopReason);
+    console.log("[Chat] Using model:", haikuModel);
 
     // Step 2: Loop to handle multiple rounds of tool calls
     const maxRounds = 10; // Allow more rounds for complex multi-table queries
@@ -58,8 +68,11 @@ export async function POST(request: NextRequest) {
 
       if (toolUseBlocks.length === 0) break;
 
+      // Adaptive model selection: Haiku for first rounds, Sonnet for complex recovery
+      const currentModel = round < switchRound ? haikuModel : sonnetModel;
+
       console.log(
-        `[Chat] Round ${round}: Processing ${toolUseBlocks.length} tool call(s)`
+        `[Chat] Round ${round}: Processing ${toolUseBlocks.length} tool call(s) [Model: ${currentModel}]`
       );
 
       // Execute tools and get results
@@ -83,8 +96,12 @@ export async function POST(request: NextRequest) {
         content: toolResults,
       });
 
-      // Get next response from Claude
-      aiResponse = await aiClient.chatWithTools(currentMessages);
+      // Get next response from Claude (adaptive model)
+      aiResponse = await aiClient.chatWithTools(
+        currentMessages,
+        undefined,
+        currentModel
+      );
       console.log(`[Chat] Round ${round} stop reason:`, aiResponse.stopReason);
     }
 
