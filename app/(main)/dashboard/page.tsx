@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 import ConnectionStatus from "@/components/ConnectionStatus";
+import { useToast } from "@/components/ToastContext";
 
 export default function DashboardPage() {
+  const { showToast } = useToast();
+  
   const quickActions = [
     {
       name: "AI Chat",
@@ -355,6 +358,41 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* Notification System Demo (hidden in production) */}
+        {process.env.NODE_ENV === "development" && (
+          <div className="rounded-2xl border border-zinc-200 bg-white p-7 shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <h3 className="mb-4 font-semibold text-zinc-900 dark:text-white">
+              🔔 Notification System (Dev Only)
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => showToast({ type: "success", message: "Operation completed successfully!" })}
+                className="rounded-xl bg-green-100 px-4 py-2 text-sm font-medium text-green-700 transition-all hover:scale-105 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50"
+              >
+                Success Toast
+              </button>
+              <button
+                onClick={() => showToast({ type: "error", message: "Failed to connect to database" })}
+                className="rounded-xl bg-red-100 px-4 py-2 text-sm font-medium text-red-700 transition-all hover:scale-105 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
+              >
+                Error Toast
+              </button>
+              <button
+                onClick={() => showToast({ type: "warning", message: "Database connection is slow" })}
+                className="rounded-xl bg-yellow-100 px-4 py-2 text-sm font-medium text-yellow-700 transition-all hover:scale-105 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:hover:bg-yellow-900/50"
+              >
+                Warning Toast
+              </button>
+              <button
+                onClick={() => showToast({ type: "info", message: "New update available" })}
+                className="rounded-xl bg-blue-100 px-4 py-2 text-sm font-medium text-blue-700 transition-all hover:scale-105 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+              >
+                Info Toast
+              </button>
+            </div>
+          </div>
+        )}
       </div>
   );
 }
