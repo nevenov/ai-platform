@@ -1,5 +1,4 @@
 import Link from "next/link";
-import DashboardLayout from "@/components/DashboardLayout";
 
 export default function DashboardPage() {
   const quickActions = [
@@ -17,7 +16,7 @@ export default function DashboardPage() {
     {
       name: "MySQL Explorer",
       description: "Browse tables, run queries, and analyze database",
-      href: "/modules/mysql/explorer",
+      href: "/mysql-explorer",
       icon: (
         <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
@@ -58,10 +57,9 @@ export default function DashboardPage() {
   ];
 
   return (
-    <DashboardLayout>
-      <div className="space-y-8">
-        {/* Header */}
-        <div>
+    <div className="space-y-8">
+      {/* Header */}
+      <div>
           <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">
             SimpleAI WebAdmin
           </h1>
@@ -211,13 +209,12 @@ export default function DashboardPage() {
                   Files
                 </span>
                 <span className="font-medium text-zinc-900 dark:text-white">
-                  All &lt;300 lines
+                  {"All <300 lines"}
                 </span>
               </li>
             </ul>
           </div>
         </div>
       </div>
-    </DashboardLayout>
   );
 }

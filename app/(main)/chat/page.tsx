@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
 
 interface Message {
   id: string;
@@ -87,13 +86,12 @@ export default function ChatPage() {
   };
 
   return (
-    <DashboardLayout>
-      <div className="flex h-[calc(100vh-2rem)] flex-col">
-        {/* Messages Container */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-4xl px-4 py-6">
-            {messages.length === 0 ? (
-              <div className="flex h-full items-center justify-center">
+    <div className="flex h-[calc(100vh-2rem)] flex-col">
+      {/* Messages Container */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-4xl px-4 py-6">
+          {messages.length === 0 ? (
+            <div className="flex h-full items-center justify-center">
                 <div className="text-center">
                   <div className="mb-4 text-6xl">💬</div>
                   <h2 className="mb-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
@@ -229,7 +227,6 @@ export default function ChatPage() {
           Press Enter to send, Shift + Enter for new line
         </p>
       </div>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }

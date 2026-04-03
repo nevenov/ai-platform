@@ -35,7 +35,7 @@ export default function Sidebar() {
         </svg>
       ),
       children: [
-        { name: "MySQL Explorer", href: "/modules/mysql/explorer" },
+        { name: "MySQL Explorer", href: "/mysql-explorer" },
         { name: "MySQL Config", href: "/modules/mysql" },
       ],
     },

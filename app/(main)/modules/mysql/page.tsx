@@ -249,7 +249,7 @@ export default function MySQLConfigurePage() {
             {message?.type === "success" && (
                 <div className="mt-6">
                   <Link
-                    href="/modules/mysql/explorer"
+                    href="/mysql-explorer"
                     className="inline-flex items-center rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 px-6 py-3 text-white font-semibold shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
                   >
                     Go to MySQL Explorer
