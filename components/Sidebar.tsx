@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import ThemeToggle from "./ThemeToggle";
+import ConnectionStatus from "./ConnectionStatus";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -239,6 +240,12 @@ export default function Sidebar() {
                     </div>
                   </div>
                 </div>
+              </div>
+              
+              {/* Connection indicators */}
+              <div className="relative mt-3 flex items-center gap-3 border-t border-zinc-200/50 pt-3 dark:border-zinc-700/50">
+                <ConnectionStatus type="mysql" compact />
+                <ConnectionStatus type="api" compact />
               </div>
               
               {/* Progress indicator */}

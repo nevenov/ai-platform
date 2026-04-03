@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import ConnectionStatus from "@/components/ConnectionStatus";
 
 export default function DashboardPage() {
   const quickActions = [
@@ -131,6 +132,23 @@ export default function DashboardPage() {
               <div className="absolute inset-0 bg-gradient-to-r from-blue-50/0 via-blue-50/50 to-blue-50/0 opacity-0 transition-opacity group-hover:opacity-100 dark:from-blue-900/0 dark:via-blue-900/10 dark:to-blue-900/0" />
             </div>
           ))}
+        </div>
+
+        {/* Connection Monitoring */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
+              Connection Status
+            </h2>
+            <span className="text-sm text-zinc-500 dark:text-zinc-400">
+              Real-time monitoring
+            </span>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <ConnectionStatus type="mysql" />
+            <ConnectionStatus type="api" endpoint="/api/health" />
+            <ConnectionStatus type="system" endpoint="/api/status" />
+          </div>
         </div>
 
         {/* Quick Actions */}
