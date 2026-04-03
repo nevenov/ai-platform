@@ -59,57 +59,103 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-          <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">
-            SimpleAI WebAdmin
-          </h1>
-          <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-            Your unified AI-powered control panel for data analysis and automation
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 via-white to-purple-50 p-8 shadow-lg dark:from-zinc-900 dark:via-zinc-900 dark:to-purple-950">
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              SimpleAI WebAdmin
+            </h1>
+            <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400">
+              ● Operational
+            </span>
+          </div>
+          <p className="text-lg text-zinc-600 dark:text-zinc-300">
+            Your unified AI-powered control panel for databases, websites, and digital operations
+          </p>
+          <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+            Ask questions in natural language • Automate tasks • Analyze data instantly
           </p>
         </div>
+        {/* Background decoration */}
+        <div className="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-purple-100/50 to-transparent dark:from-purple-900/20" />
+      </div>
 
         {/* Stats */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (
             <div
               key={stat.name}
-              className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+              className="group relative overflow-hidden rounded-xl border border-zinc-200 bg-white p-6 shadow-sm transition-all hover:shadow-md hover:border-blue-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-700"
             >
-              <div className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                {stat.name}
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                  {stat.name}
+                </div>
+                <div className="rounded-lg bg-blue-50 p-2 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
+                  {stat.name === "AI Model" && (
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  )}
+                  {stat.name === "Tool Model" && (
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  )}
+                  {stat.name === "Database" && (
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                    </svg>
+                  )}
+                  {stat.name === "Status" && (
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  )}
+                </div>
               </div>
-              <div className="mt-2 flex items-baseline justify-between">
-                <div className="text-2xl font-semibold text-zinc-900 dark:text-white">
+              <div className="mt-3 flex items-baseline justify-between">
+                <div className="text-2xl font-bold text-zinc-900 dark:text-white">
                   {stat.value}
                 </div>
-                <div className="text-xs text-green-600 dark:text-green-400">
+                <div className="flex items-center gap-1 text-xs font-semibold text-green-600 dark:text-green-400">
+                  <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
                   {stat.change}
                 </div>
               </div>
+              {/* Hover gradient effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-50/0 via-blue-50/50 to-blue-50/0 opacity-0 transition-opacity group-hover:opacity-100 dark:from-blue-900/0 dark:via-blue-900/10 dark:to-blue-900/0" />
             </div>
           ))}
         </div>
 
         {/* Quick Actions */}
         <div>
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">
-            Quick Actions
-          </h2>
-          <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
+              Quick Actions
+            </h2>
+            <span className="text-sm text-zinc-500 dark:text-zinc-400">
+              Jump to key features
+            </span>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-2">
             {quickActions.map((action) => (
               <Link
                 key={action.name}
                 href={action.href}
-                className="group relative overflow-hidden rounded-xl border border-zinc-200 bg-white p-6 shadow-sm transition-all hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+                className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-700"
               >
-                <div className="flex items-start gap-4">
+                <div className="relative z-10 flex items-start gap-4">
                   <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${action.gradient} text-white`}
+                    className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${action.gradient} text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}
                   >
                     {action.icon}
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-zinc-900 dark:text-white">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-zinc-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                       {action.name}
                     </h3>
                     <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
@@ -117,7 +163,7 @@ export default function DashboardPage() {
                     </p>
                   </div>
                   <svg
-                    className="h-5 w-5 text-zinc-400 transition-transform group-hover:translate-x-1 dark:text-zinc-600"
+                    className="h-6 w-6 shrink-0 text-zinc-400 transition-all duration-300 group-hover:translate-x-2 group-hover:text-blue-600 dark:text-zinc-600 dark:group-hover:text-blue-400"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -125,11 +171,15 @@ export default function DashboardPage() {
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
+                      strokeWidth={2.5}
+                      d="M13 7l5 5m0 0l-5 5m5-5H6"
                     />
                   </svg>
                 </div>
+                {/* Gradient overlay on hover */}
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-50/0 via-blue-100/30 to-purple-50/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:from-blue-950/0 dark:via-blue-900/20 dark:to-purple-950/0" />
+                {/* Bottom accent line */}
+                <div className="absolute bottom-0 left-0 h-1 w-0 bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300 group-hover:w-full" />
               </Link>
             ))}
           </div>
