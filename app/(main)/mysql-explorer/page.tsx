@@ -46,16 +46,16 @@ function Tabs({
   ] as const;
 
   return (
-    <div className="sticky top-0 z-20 bg-gray-900 border-b border-gray-700 flex">
+    <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 flex">
       {tabs.map((t) => (
         <button
           key={t.id}
           onClick={() => onChange(t.id)}
-          className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors
+          className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-all
             ${
               active === t.id
-                ? "bg-gray-800 text-white border-b-2 border-blue-400"
-                : "text-gray-400 hover:text-white hover:bg-gray-800"
+                ? "bg-zinc-50 dark:bg-zinc-800 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
             }`}
         >
           <t.icon className="w-4 h-4" />
@@ -273,7 +273,7 @@ function DatabaseOverview({
   const meta = firstTableDescribe.metadata;
 
   return (
-    <div className="space-y-1 text-gray-300 text-sm">
+    <div className="space-y-2 text-zinc-700 dark:text-zinc-300 text-sm">
       <div>
         <span className="text-gray-400">Tables:</span> {tables.length}
       </div>
@@ -303,11 +303,11 @@ function StructureTab({
   firstTableDescribe: any | null;
 }) {
   return (
-    <div className="p-4 space-y-6 text-gray-200">
+    <div className="py-6 space-y-6">
       {/* Overview */}
       <div>
-        <h2 className="text-lg font-semibold mb-2">Database Overview</h2>
-        <div className="border border-gray-700 bg-gray-800 rounded p-3">
+        <h2 className="text-lg font-semibold mb-3 text-zinc-900 dark:text-white">Database Overview</h2>
+        <div className="border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-4">
           <DatabaseOverview
             tables={tables}
             firstTableDescribe={firstTableDescribe}
@@ -317,10 +317,10 @@ function StructureTab({
 
       {/* Tables */}
       <div>
-        <h2 className="text-lg font-semibold mb-2">Tables</h2>
-        <div className="border border-gray-700 bg-gray-800 rounded p-3 max-h-80 overflow-y-auto">
+        <h2 className="text-lg font-semibold mb-3 text-zinc-900 dark:text-white">Tables</h2>
+        <div className="border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-4 max-h-80 overflow-y-auto">
           {tables.length === 0 && (
-            <div className="text-gray-400 text-sm">No tables loaded.</div>
+            <div className="text-zinc-500 dark:text-zinc-400 text-sm">No tables loaded.</div>
           )}
 
           <ul className="space-y-1">
@@ -328,11 +328,11 @@ function StructureTab({
               <li key={t}>
                 <button
                   onClick={() => onSelectTable(t)}
-                  className={`w-full text-left px-3 py-1 rounded transition
+                  className={`w-full text-left px-3 py-2 rounded-lg transition font-medium
                     ${
                       selectedTable === t
                         ? "bg-blue-600 text-white"
-                        : "hover:bg-gray-700 text-gray-300"
+                        : "hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300"
                     }`}
                 >
                   {t}
@@ -451,52 +451,47 @@ export default function MySQLExplorerPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-900 text-gray-200">
-      {/* LEFT SIDEBAR */}
-      <div className="w-64 border-r border-gray-800 bg-gray-950 p-4 space-y-4">
-        <h2 className="text-xl font-bold text-gray-100">MySQL Explorer</h2>
-
-        {/* Connection */}
-        <button
-          onClick={ping}
-          className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 transition text-white rounded"
-        >
-          Test Connection
-        </button>
-        {status && <p className="text-sm text-gray-400">Status: {status}</p>}
-
-        {/* Tables */}
-        <button
-          onClick={loadTables}
-          className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 transition text-white rounded"
-        >
-          Load Tables
-        </button>
-
-        {/* <div className="mt-4">
-          <h3 className="font-semibold mb-2 text-gray-300">Tables</h3>
-          <ul className="space-y-1 max-h-64 overflow-y-auto">
-            {tables.map((t) => (
-              <li key={t}>
-                <button
-                  onClick={() => describeTable(t)}
-                  className={`w-full text-left px-2 py-1 rounded transition
-                    ${
-                      selectedTable === t
-                        ? "bg-blue-600 text-white"
-                        : "hover:bg-gray-800 text-gray-300"
-                    }`}
-                >
-                  {t}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div> */}
+    <div className="flex flex-col min-h-screen bg-zinc-50 dark:bg-zinc-950">
+      {/* HEADER WITH ACTIONS */}
+      <div className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-6 py-4 sticky top-0 z-10">
+        <div className="flex items-start justify-between gap-6">
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">MySQL Explorer</h1>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
+              Browse tables, run queries, and explore your database
+            </p>
+          </div>
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <button
+              onClick={ping}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 transition text-white rounded-lg font-medium shadow-sm"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Test Connection
+            </button>
+            <button
+              onClick={loadTables}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 transition text-white rounded-lg font-medium shadow-sm"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+              </svg>
+              Load Tables
+            </button>
+            {status && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm font-medium">
+                <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                {status}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* MAIN PANEL */}
-      <div className="flex-1 flex flex-col overflow-y-auto">
+      <div className="flex-1 flex flex-col">
         {/* Tabs */}
         <Tabs active={activeTab} onChange={setActiveTab} />
 
