@@ -285,51 +285,56 @@ export default function DashboardPage() {
 
           {/* Recent Activity */}
           <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <h3 className="font-semibold text-zinc-900 dark:text-white">
-              📊 System Info
-            </h3>
-            <ul className="mt-4 space-y-3 text-sm">
-              <li className="flex justify-between">
-                <span className="text-zinc-600 dark:text-zinc-400">
-                  Cost Optimization
-                </span>
-                <span className="font-medium text-green-600 dark:text-green-400">
-                  92% savings
-                </span>
-              </li>
-              <li className="flex justify-between">
-                <span className="text-zinc-600 dark:text-zinc-400">
-                  Query Budget
-                </span>
-                <span className="font-medium text-zinc-900 dark:text-white">
-                  ~450 queries/$5
-                </span>
-              </li>
-              <li className="flex justify-between">
-                <span className="text-zinc-600 dark:text-zinc-400">
-                  Performance
-                </span>
-                <span className="font-medium text-blue-600 dark:text-blue-400">
-                  2-3x faster
-                </span>
-              </li>
-              <li className="flex justify-between">
-                <span className="text-zinc-600 dark:text-zinc-400">
-                  Architecture
-                </span>
-                <span className="font-medium text-purple-600 dark:text-purple-400">
-                  Modular
-                </span>
-              </li>
-              <li className="flex justify-between">
-                <span className="text-zinc-600 dark:text-zinc-400">
-                  Files
-                </span>
-                <span className="font-medium text-zinc-900 dark:text-white">
-                  {"All <300 lines"}
-                </span>
-              </li>
-            </ul>
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="font-semibold text-zinc-900 dark:text-white">
+                📈 Recent Activity
+              </h3>
+              <span className="text-xs text-zinc-500 dark:text-zinc-400">Last 24 hours</span>
+            </div>
+            <div className="space-y-3">
+              {/* Activity Item 1 */}
+              <div className="flex items-start gap-3 rounded-lg border border-zinc-100 bg-zinc-50 p-3 transition-all hover:border-blue-200 hover:bg-blue-50/50 dark:border-zinc-800 dark:bg-zinc-800/50 dark:hover:border-blue-800 dark:hover:bg-blue-900/20">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-zinc-900 dark:text-white">AI Query executed</p>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">Show me total patients by clinic</p>
+                  <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-500">2 hours ago</p>
+                </div>
+              </div>
+
+              {/* Activity Item 2 */}
+              <div className="flex items-start gap-3 rounded-lg border border-zinc-100 bg-zinc-50 p-3 transition-all hover:border-blue-200 hover:bg-blue-50/50 dark:border-zinc-800 dark:bg-zinc-800/50 dark:hover:border-blue-800 dark:hover:bg-blue-900/20">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-zinc-900 dark:text-white">Database explored</p>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">Viewed patients table structure</p>
+                  <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-500">5 hours ago</p>
+                </div>
+              </div>
+
+              {/* Activity Item 3 */}
+              <div className="flex items-start gap-3 rounded-lg border border-zinc-100 bg-zinc-50 p-3 transition-all hover:border-blue-200 hover:bg-blue-50/50 dark:border-zinc-800 dark:bg-zinc-800/50 dark:hover:border-blue-800 dark:hover:bg-blue-900/20">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-zinc-900 dark:text-white">MySQL connection tested</p>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">Connection successful</p>
+                  <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-500">Yesterday</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
