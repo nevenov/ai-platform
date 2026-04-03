@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 export default function DashboardPage() {
@@ -183,6 +185,71 @@ export default function DashboardPage() {
               </Link>
             ))}
           </div>
+        </div>
+
+        {/* AI Assistant Quick Panel */}
+        <div className="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-purple-50 p-6 shadow-lg dark:border-blue-900/50 dark:from-blue-950/30 dark:to-purple-950/30">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg">
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="font-bold text-zinc-900 dark:text-white">AI Assistant</h3>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">Ask me anything about your data</p>
+            </div>
+          </div>
+
+          {/* Quick Prompts */}
+          <div className="mb-4 flex flex-wrap gap-2">
+            <a
+              href="/chat?q=Show me total patients"
+              className="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 shadow-sm transition-all hover:scale-105 hover:shadow-md dark:bg-zinc-800 dark:text-zinc-300"
+            >
+              💊 Total patients
+            </a>
+            <a
+              href="/chat?q=Top 5 clinics by patients"
+              className="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 shadow-sm transition-all hover:scale-105 hover:shadow-md dark:bg-zinc-800 dark:text-zinc-300"
+            >
+              🏥 Top clinics
+            </a>
+            <a
+              href="/chat?q=Compare patients by gender"
+              className="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 shadow-sm transition-all hover:scale-105 hover:shadow-md dark:bg-zinc-800 dark:text-zinc-300"
+            >
+              📊 Gender analysis
+            </a>
+          </div>
+
+          {/* Input Field */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const input = new FormData(e.currentTarget).get("query") as string;
+              if (input?.trim()) {
+                window.location.href = `/chat?q=${encodeURIComponent(input)}`;
+              }
+            }}
+            className="flex gap-2"
+          >
+            <input
+              type="text"
+              name="query"
+              placeholder="Ask AI anything... (e.g., 'Show me all tables')"
+              className="flex-1 rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-500 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-400"
+            />
+            <button
+              type="submit"
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Ask
+            </button>
+          </form>
         </div>
 
         {/* Info Cards */}

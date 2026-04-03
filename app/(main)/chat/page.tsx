@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 interface Message {
   id: string;
@@ -10,6 +11,7 @@ interface Message {
 }
 
 export default function ChatPage() {
+  const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +25,21 @@ export default function ChatPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Auto-submit query from URL parameter
+  useEffect(() => {
+    const query = searchParams.get("q");
+    if (query && !isLoading && messages.length === 0) {
+      setInput(query);
+      // Auto-submit after a small delay to ensure input is set
+      setTimeout(() => {
+        const form = document.querySelector("form");
+        if (form) {
+          form.requestSubmit();
+        }
+      }, 100);
+    }
+  }, [searchParams, isLoading, messages.length]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
