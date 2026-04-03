@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -87,7 +88,7 @@ export default function Sidebar() {
       >
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className="flex h-16 items-center border-b border-zinc-200 px-6 dark:border-zinc-800">
+          <div className="flex h-16 items-center justify-between border-b border-zinc-200 px-6 dark:border-zinc-800">
             <Link href="/dashboard" className="group flex items-center gap-2.5 transition-all duration-200 hover:scale-105">
               <div className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 shadow-lg transition-all duration-200 group-hover:shadow-xl">
                 {/* Animated gradient overlay */}
@@ -106,6 +107,9 @@ export default function Sidebar() {
                 </span>
               </div>
             </Link>
+            
+            {/* Theme Toggle */}
+            <ThemeToggle />
           </div>
 
           {/* Navigation */}
