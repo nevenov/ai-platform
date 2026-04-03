@@ -60,9 +60,9 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 via-white to-purple-50 p-8 shadow-lg dark:from-zinc-900 dark:via-zinc-900 dark:to-purple-950">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-50 via-white to-purple-50 p-10 shadow-xl dark:from-zinc-900 dark:via-zinc-900 dark:to-purple-950">
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -84,11 +84,11 @@ export default function DashboardPage() {
       </div>
 
         {/* Stats */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (
             <div
               key={stat.name}
-              className="group relative overflow-hidden rounded-xl border border-zinc-200 bg-white p-6 shadow-sm transition-all hover:shadow-md hover:border-blue-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-700"
+              className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-md transition-all duration-200 hover:shadow-xl hover:border-blue-300 hover:-translate-y-1 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-700"
             >
               <div className="flex items-center justify-between">
                 <div className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
@@ -136,7 +136,7 @@ export default function DashboardPage() {
 
         {/* Connection Monitoring */}
         <div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-5">
             <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
               Connection Status
             </h2>
@@ -144,7 +144,7 @@ export default function DashboardPage() {
               Real-time monitoring
             </span>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             <ConnectionStatus type="mysql" />
             <ConnectionStatus type="api" endpoint="/api/health" />
             <ConnectionStatus type="system" endpoint="/api/status" />
@@ -153,7 +153,7 @@ export default function DashboardPage() {
 
         {/* Quick Actions */}
         <div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-5">
             <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
               Quick Actions
             </h2>
@@ -161,12 +161,12 @@ export default function DashboardPage() {
               Jump to key features
             </span>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
             {quickActions.map((action) => (
               <Link
                 key={action.name}
                 href={action.href}
-                className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-700"
+                className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-7 shadow-md transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-blue-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-700"
               >
                 <div className="relative z-10 flex items-start gap-4">
                   <div
@@ -206,7 +206,7 @@ export default function DashboardPage() {
         </div>
 
         {/* AI Assistant Quick Panel */}
-        <div className="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-purple-50 p-6 shadow-lg dark:border-blue-900/50 dark:from-blue-950/30 dark:to-purple-950/30">
+        <div className="rounded-3xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-purple-50 p-8 shadow-xl dark:border-blue-900/50 dark:from-blue-950/30 dark:to-purple-950/30">
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg">
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,19 +223,19 @@ export default function DashboardPage() {
           <div className="mb-4 flex flex-wrap gap-2">
             <a
               href="/chat?q=Show me total patients"
-              className="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 shadow-sm transition-all hover:scale-105 hover:shadow-md dark:bg-zinc-800 dark:text-zinc-300"
+              className="rounded-xl bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-md transition-all hover:scale-105 hover:shadow-lg hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:from-purple-900/20 dark:hover:to-blue-900/20"
             >
               💊 Total patients
             </a>
             <a
               href="/chat?q=Top 5 clinics by patients"
-              className="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 shadow-sm transition-all hover:scale-105 hover:shadow-md dark:bg-zinc-800 dark:text-zinc-300"
+              className="rounded-xl bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-md transition-all hover:scale-105 hover:shadow-lg hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:from-purple-900/20 dark:hover:to-blue-900/20"
             >
               🏥 Top clinics
             </a>
             <a
               href="/chat?q=Compare patients by gender"
-              className="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 shadow-sm transition-all hover:scale-105 hover:shadow-md dark:bg-zinc-800 dark:text-zinc-300"
+              className="rounded-xl bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-md transition-all hover:scale-105 hover:shadow-lg hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:from-purple-900/20 dark:hover:to-blue-900/20"
             >
               📊 Gender analysis
             </a>
@@ -271,9 +271,9 @@ export default function DashboardPage() {
         </div>
 
         {/* Info Cards */}
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-7 lg:grid-cols-2">
           {/* Getting Started */}
-          <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="rounded-2xl border border-zinc-200 bg-white p-7 shadow-md transition-all duration-200 hover:shadow-lg hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700">
             <h3 className="font-semibold text-zinc-900 dark:text-white">
               🚀 Getting Started
             </h3>
@@ -302,7 +302,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Recent Activity */}
-          <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="rounded-2xl border border-zinc-200 bg-white p-7 shadow-md transition-all duration-200 hover:shadow-lg hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="font-semibold text-zinc-900 dark:text-white">
                 📈 Recent Activity

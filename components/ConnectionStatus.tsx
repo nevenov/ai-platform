@@ -98,7 +98,7 @@ export default function ConnectionStatus({
   }
 
   return (
-    <div className="group relative flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 transition-all hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-zinc-600">
+    <div className="group relative flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-md transition-all duration-200 hover:shadow-lg hover:border-zinc-300 hover:-translate-y-0.5 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-zinc-600">
       {/* Status indicator */}
       <div className="relative flex items-center justify-center">
         <div className={`h-3 w-3 rounded-full ${config.color} ${config.pulse ? "animate-pulse" : ""}`} />
