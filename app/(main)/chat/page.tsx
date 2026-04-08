@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface Message {
   id: string;
@@ -135,9 +137,114 @@ export default function ChatPage() {
                           : "bg-white text-zinc-900 shadow-md dark:bg-zinc-800 dark:text-zinc-50"
                       }`}
                     >
-                      <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
-                        {message.content}
-                      </p>
+                      {message.role === "assistant" ? (
+                        <div className="prose prose-sm prose-zinc max-w-none dark:prose-invert">
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              // Table styling
+                              table: ({ ...props }) => (
+                                <div className="my-4 overflow-x-auto">
+                                  <table
+                                    className="min-w-full divide-y divide-zinc-200 rounded-lg border border-zinc-200 dark:divide-zinc-700 dark:border-zinc-700"
+                                    {...props}
+                                  />
+                                </div>
+                              ),
+                              thead: ({ ...props }) => (
+                                <thead className="bg-zinc-50 dark:bg-zinc-900" {...props} />
+                              ),
+                              tbody: ({ ...props }) => (
+                                <tbody className="divide-y divide-zinc-200 bg-white dark:divide-zinc-700 dark:bg-zinc-800" {...props} />
+                              ),
+                              tr: ({ ...props }) => (
+                                <tr className="hover:bg-zinc-50 dark:hover:bg-zinc-700/50" {...props} />
+                              ),
+                              th: ({ ...props }) => (
+                                <th
+                                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300"
+                                  {...props}
+                                />
+                              ),
+                              td: ({ ...props }) => (
+                                <td className="whitespace-nowrap px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100" {...props} />
+                              ),
+                              // Headings
+                              h1: ({ ...props }) => (
+                                <h1 className="mb-4 mt-6 text-2xl font-bold text-zinc-900 dark:text-zinc-50" {...props} />
+                              ),
+                              h2: ({ ...props }) => (
+                                <h2 className="mb-3 mt-5 text-xl font-bold text-zinc-900 dark:text-zinc-50" {...props} />
+                              ),
+                              h3: ({ ...props }) => (
+                                <h3 className="mb-2 mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50" {...props} />
+                              ),
+                              // Paragraphs & Lists
+                              p: ({ ...props }) => (
+                                <p className="mb-3 leading-relaxed text-zinc-900 dark:text-zinc-50" {...props} />
+                              ),
+                              ul: ({ ...props }) => (
+                                <ul className="mb-3 ml-5 list-disc space-y-1 text-zinc-900 dark:text-zinc-50" {...props} />
+                              ),
+                              ol: ({ ...props }) => (
+                                <ol className="mb-3 ml-5 list-decimal space-y-1 text-zinc-900 dark:text-zinc-50" {...props} />
+                              ),
+                              li: ({ ...props }) => (
+                                <li className="text-zinc-900 dark:text-zinc-50" {...props} />
+                              ),
+                              // Code blocks
+                              code: ({ inline, ...props }: { inline?: boolean; [key: string]: unknown }) =>
+                                inline ? (
+                                  <code
+                                    className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-sm text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100"
+                                    {...props}
+                                  />
+                                ) : (
+                                  <code
+                                    className="block rounded-lg bg-zinc-100 p-4 font-mono text-sm text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100"
+                                    {...props}
+                                  />
+                                ),
+                              pre: ({ ...props }) => (
+                                <pre className="my-4 overflow-x-auto rounded-lg bg-zinc-100 p-4 dark:bg-zinc-900" {...props} />
+                              ),
+                              // Links
+                              a: ({ ...props }) => (
+                                <a
+                                  className="text-blue-600 underline hover:text-blue-700 dark:text-cyan-400 dark:hover:text-cyan-300"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  {...props}
+                                />
+                              ),
+                              // Strong & Emphasis
+                              strong: ({ ...props }) => (
+                                <strong className="font-bold text-zinc-900 dark:text-zinc-50" {...props} />
+                              ),
+                              em: ({ ...props }) => (
+                                <em className="italic text-zinc-900 dark:text-zinc-50" {...props} />
+                              ),
+                              // Blockquote
+                              blockquote: ({ ...props }) => (
+                                <blockquote
+                                  className="my-4 border-l-4 border-zinc-300 pl-4 italic text-zinc-700 dark:border-zinc-600 dark:text-zinc-300"
+                                  {...props}
+                                />
+                              ),
+                              // Horizontal rule
+                              hr: ({ ...props }) => (
+                                <hr className="my-6 border-zinc-200 dark:border-zinc-700" {...props} />
+                              ),
+                            }}
+                          >
+                            {message.content}
+                          </ReactMarkdown>
+                        </div>
+                      ) : (
+                        <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+                          {message.content}
+                        </p>
+                      )}
                       <span
                         className={`mt-1 block text-xs ${
                           message.role === "user"
