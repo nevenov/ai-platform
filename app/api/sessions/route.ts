@@ -18,16 +18,15 @@ export async function GET() {
   try {
     const sessions = await listSessions();
 
-    return NextResponse.json({
-      success: true,
-      count: sessions.length,
-      sessions: sessions.map((s) => ({
+    // Return array directly (matches UI expectations)
+    return NextResponse.json(
+      sessions.map((s) => ({
         id: s.id,
         title: s.title,
         created: s.created.toISOString(),
         messageCount: s.messageCount,
-      })),
-    });
+      }))
+    );
   } catch (error) {
     console.error("[API] Failed to list sessions:", error);
 
@@ -63,11 +62,14 @@ export async function POST(request: NextRequest) {
       timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
     }));
 
-    const sessionId = await createSession(formattedMessages, title);
+    const result = await createSession(formattedMessages, title);
+    const sessionId = typeof result === 'string' ? result : result.id;
+    const sessionTitle = typeof result === 'string' ? 'Session' : result.title;
 
     return NextResponse.json({
       success: true,
       sessionId,
+      title: sessionTitle,
       message: "Session saved successfully",
     });
   } catch (error) {

@@ -29,7 +29,7 @@ export interface SessionMetadata {
 export async function createSession(
   messages: Message[],
   customTitle?: string
-): Promise<string> {
+): Promise<{ id: string; title: string }> {
   // Ensure directory exists
   await fs.mkdir(SESSIONS_DIR, { recursive: true });
 
@@ -51,7 +51,8 @@ export async function createSession(
   // Check if cleanup needed (FIFO)
   await cleanupOldSessionsIfNeeded();
 
-  return id;
+  // Return both id and title
+  return { id, title };
 }
 
 /**
@@ -90,7 +91,7 @@ export async function listSessions(): Promise<SessionMetadata[]> {
 /**
  * Load a specific session by ID
  */
-export async function loadSession(id: string): Promise<Message[] | null> {
+export async function loadSession(id: string): Promise<{ title: string; messages: Message[] } | null> {
   try {
     await fs.access(SESSIONS_DIR);
   } catch {
@@ -189,9 +190,16 @@ function formatSessionAsMarkdown(
 /**
  * Parse session Markdown back to messages
  */
-function parseSessionMarkdown(markdown: string): Message[] {
+function parseSessionMarkdown(markdown: string): { title: string; messages: Message[] } {
   const messages: Message[] = [];
   const lines = markdown.split("\n");
+
+  // Extract title from first line: # Chat Session: {title}
+  let title = "Untitled Session";
+  const titleMatch = lines[0]?.match(/^# Chat Session: (.+)$/);
+  if (titleMatch) {
+    title = titleMatch[1];
+  }
 
   let currentMessage: Partial<Message> | null = null;
   let contentLines: string[] = [];
@@ -230,7 +238,7 @@ function parseSessionMarkdown(markdown: string): Message[] {
     });
   }
 
-  return messages;
+  return { title, messages };
 }
 
 /**

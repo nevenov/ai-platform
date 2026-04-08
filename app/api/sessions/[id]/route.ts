@@ -20,9 +20,9 @@ export async function GET(
 ) {
   try {
     const { id } = await context.params;
-    const messages = await loadSession(id);
+    const sessionData = await loadSession(id);
 
-    if (!messages) {
+    if (!sessionData) {
       return NextResponse.json(
         { success: false, error: "Session not found" },
         { status: 404 }
@@ -32,8 +32,9 @@ export async function GET(
     return NextResponse.json({
       success: true,
       sessionId: id,
-      messageCount: messages.length,
-      messages: messages.map((m) => ({
+      title: sessionData.title,
+      messageCount: sessionData.messages.length,
+      messages: sessionData.messages.map((m) => ({
         role: m.role,
         content: m.content,
         timestamp: m.timestamp.toISOString(),

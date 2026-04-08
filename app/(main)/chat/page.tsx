@@ -183,7 +183,8 @@ export default function ChatPage() {
       const data = await res.json();
 
       if (res.ok) {
-        showToast({ type: "success", message: `Session saved: "${data.title}"` });
+        const sessionTitle = data.title || "New Session";
+        showToast({ type: "success", message: `Session saved: "${sessionTitle}"` });
         
         // Refresh sessions list
         const refreshRes = await fetch("/api/sessions");
