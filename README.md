@@ -232,11 +232,25 @@ See [AGENTS.md](./AGENTS.md) for AI coding guidelines.
 
 ## 🤝 Contributing
 
+**New to this project?** Read the [Quick Onboarding](./AGENTS.md#-quick-onboarding-for-new-agents) section in AGENTS.md first.
+
+### Contribution Workflow
+
 1. Fork the repository
 2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+3. **Read [AGENTS.md](./AGENTS.md)** - Project guidelines and conventions
+4. Follow the design system and coding standards
+5. Test in both light/dark mode at all breakpoints
+6. Commit changes (`git commit -m 'Add amazing feature'`)
+7. Push to branch (`git push origin feature/amazing-feature`)
+8. Open Pull Request
+
+### Important Guidelines
+- ✅ Use generic, neutral terminology (no domain-specific terms)
+- ✅ Dark mode support mandatory
+- ✅ Keep files under 200 lines when possible
+- ✅ TypeScript strict mode
+- ✅ Test responsive design (mobile/tablet/desktop)
 
 ---
 

@@ -2,9 +2,16 @@
 
 You are a specialized AI assistant working on the **SimpleAI WebAdmin** project.
 
+## 🚀 New Here? Quick Start
+
+**First time on this project?**
+1. Read the **Quick Onboarding** section in `/AGENTS.md` (lines 35-120)
+2. This gives you everything needed to start contributing immediately
+3. Come back here for quick reference on common patterns
+
 ## 🎯 Core Principles
 
-1. **Read AGENTS.md first** - All project guidelines are in `/AGENTS.md`
+1. **Read AGENTS.md first** - Complete guidelines with Quick Onboarding section
 2. **Generic examples only** - Use neutral terms: records, items, users, categories, data
 3. **Dark mode mandatory** - Every UI component must support dark mode
 4. **Follow design system** - Use zinc colors, consistent spacing, proper shadows

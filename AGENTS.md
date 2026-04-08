@@ -28,7 +28,96 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ---
 
-## 📁 Project Structure
+## � Quick Onboarding (For New Agents)
+
+**First time working on this project? Start here:**
+
+### Critical Rules (Read First!)
+1. **🌍 Generic & Universal** - This is NOT a domain-specific app
+   - ❌ Never use: medical, healthcare, finance, e-commerce terms
+   - ✅ Always use: records, items, users, data, entries, categories
+   
+2. **🎨 Design System Compliance**
+   - Dark mode is **mandatory** - every component needs `dark:*` classes
+   - Colors: zinc palette (50-950) + blue-purple gradients
+   - Spacing: gap-5/6/7, p-6/7/8 (consistent patterns)
+   - Border radius: rounded-xl (small), rounded-2xl (cards), rounded-3xl (hero)
+   - Shadows: shadow-md/lg/xl (always increase on hover)
+
+3. **📏 Code Organization**
+   - Files < 200 lines preferred (modular architecture)
+   - Use TypeScript strict mode
+   - Client components: add `"use client"` when using hooks/events
+   - Server components: default (no hooks, data fetching only)
+
+4. **🔒 Security First**
+   - SQL queries: READ-ONLY mode (SELECT, SHOW, DESCRIBE, EXPLAIN)
+   - Validation in `lib/safety.ts` - never bypass
+   - Environment variables in `.env.local` (git-ignored)
+   - Never commit credentials or domain-specific data
+
+5. **📱 Responsive Design**
+   - Test at 3 breakpoints: mobile (`sm:`), tablet (`lg:`), desktop (`xl:`)
+   - Mobile-first approach
+   - Touch-friendly interactions
+
+### Where to Find What
+
+| Need to... | Look at... |
+|------------|------------|
+| Add dashboard widget | `app/(main)/dashboard/page.tsx` |
+| Add sidebar link | `components/Sidebar.tsx` |
+| Create API endpoint | `app/api/your-endpoint/route.ts` |
+| Add reusable component | `components/YourComponent.tsx` |
+| Add utility function | `lib/your-util.ts` |
+| Understand architecture | `ARCHITECTURE.md` |
+| Setup environment | `README.md` |
+
+### Common Task Patterns
+
+**Show toast notification:**
+```tsx
+import { useToast } from "@/components/ToastContext";
+const { showToast } = useToast();
+showToast({ type: "success", message: "Done!" });
+```
+
+**Connection status:**
+```tsx
+<ConnectionStatus type="mysql" />
+<ConnectionStatus type="api" endpoint="/api/health" />
+```
+
+**Dark mode aware component:**
+```tsx
+<div className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white">
+  {/* Content */}
+</div>
+```
+
+### Tech Stack Quick Reference
+- **Framework:** Next.js 16.2.1 (App Router)
+- **Language:** TypeScript (strict mode)
+- **Styling:** Tailwind CSS v3
+- **AI:** Claude API (Anthropic)
+- **Database:** MySQL via MCP Server
+- **Theme:** next-themes
+- **Editor:** Monaco Editor (SQL syntax highlighting)
+
+### Before Making Changes Checklist
+- [ ] Generic terminology only (no domain-specific terms)
+- [ ] Dark mode classes included (`dark:*`)
+- [ ] Responsive design considered (sm:/lg:/xl:)
+- [ ] File size < 200 lines (or well justified)
+- [ ] TypeScript types added
+- [ ] Tested in both light and dark mode
+- [ ] No console errors or warnings
+
+**Need more details?** Continue reading below for comprehensive guidelines.
+
+---
+
+## �📁 Project Structure
 
 ```
 app/
