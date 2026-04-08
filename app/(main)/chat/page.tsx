@@ -193,17 +193,21 @@ export default function ChatPage() {
                                 <li className="text-zinc-900 dark:text-zinc-50" {...props} />
                               ),
                               // Code blocks
-                              code: ({ inline, ...props }: { inline?: boolean; [key: string]: unknown }) =>
+                              code: ({ inline, children, ...props }: { inline?: boolean; children?: React.ReactNode }) =>
                                 inline ? (
                                   <code
                                     className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-sm text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100"
                                     {...props}
-                                  />
+                                  >
+                                    {children}
+                                  </code>
                                 ) : (
                                   <code
                                     className="block rounded-lg bg-zinc-100 p-4 font-mono text-sm text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100"
                                     {...props}
-                                  />
+                                  >
+                                    {children}
+                                  </code>
                                 ),
                               pre: ({ ...props }) => (
                                 <pre className="my-4 overflow-x-auto rounded-lg bg-zinc-100 p-4 dark:bg-zinc-900" {...props} />
