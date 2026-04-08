@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useToast } from "@/components/ToastContext";
 
 interface Message {
   id: string;
@@ -14,10 +15,20 @@ interface Message {
 
 export default function ChatPage() {
   const searchParams = useSearchParams();
+  const { showToast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Schema status
+  const [schemaAge, setSchemaAge] = useState<number | null>(null);
+  const [showSchemaWarning, setShowSchemaWarning] = useState(false);
+
+  // Session management
+  const [sessions, setSessions] = useState<{ id: string; title: string; created: string }[]>([]);
+  const [isLoadingSession, setIsLoadingSession] = useState(false);
+  const [showSessionPicker, setShowSessionPicker] = useState(false);
 
   // Auto scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -26,6 +37,63 @@ export default function ChatPage() {
 
   useEffect(() => {
     scrollToBottom();
+  }, [messages]);
+
+  // Check schema age on mount
+  useEffect(() => {
+    async function checkSchema() {
+      try {
+        const res = await fetch("/api/schema/status");
+        const data = await res.json();
+        
+        if (data.ageHours !== null) {
+          setSchemaAge(data.ageHours);
+          setShowSchemaWarning(data.needsRefresh);
+        }
+      } catch (error) {
+        console.error("Failed to check schema status:", error);
+      }
+    }
+    checkSchema();
+  }, []);
+
+  // Load sessions list on mount
+  useEffect(() => {
+    async function loadSessions() {
+      try {
+        const res = await fetch("/api/sessions");
+        const data = await res.json();
+        
+        if (Array.isArray(data)) {
+          setSessions(data.slice(0, 20)); // Show last 20 sessions
+        }
+      } catch (error) {
+        console.error("Failed to load sessions:", error);
+      }
+    }
+    loadSessions();
+  }, []);
+
+  // Auto-save session before unload
+  useEffect(() => {
+    const handleBeforeUnload = async () => {
+      if (messages.length > 0) {
+        // Save session using navigator.sendBeacon for reliability
+        const sessionData = JSON.stringify({
+          messages: messages.map(msg => ({
+            role: msg.role,
+            content: msg.content,
+            timestamp: msg.timestamp.toISOString(),
+          })),
+        });
+        
+        const blob = new Blob([sessionData], { type: 'application/json' });
+        navigator.sendBeacon('/api/sessions', blob);
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [messages]);
 
   // Auto-submit query from URL parameter
@@ -42,6 +110,95 @@ export default function ChatPage() {
       }, 100);
     }
   }, [searchParams, isLoading, messages.length]);
+
+  // Refresh schema
+  const refreshSchema = async () => {
+    try {
+      const res = await fetch("/api/schema/generate", { method: "POST" });
+      const data = await res.json();
+      
+      if (res.ok) {
+        setSchemaAge(0);
+        setShowSchemaWarning(false);
+        showToast({ type: "success", message: `Schema refreshed! ${data.tables} tables, ${data.totalColumns} columns` });
+      } else {
+        showToast({ type: "error", message: `Schema refresh failed: ${data.error}` });
+      }
+    } catch (error) {
+      showToast({ type: "error", message: "Network error while refreshing schema" });
+      console.error(error);
+    }
+  };
+
+  // Load a previous session
+  const loadSession = async (sessionId: string) => {
+    setIsLoadingSession(true);
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}`);
+      const data = await res.json();
+      
+      if (res.ok && Array.isArray(data.messages)) {
+        // Convert messages to expected format
+        const loadedMessages: Message[] = data.messages.map((msg: { role: string; content: string; timestamp?: string }, index: number) => ({
+          id: `${Date.now()}-${index}`,
+          role: msg.role,
+          content: msg.content,
+          timestamp: new Date(msg.timestamp || Date.now()),
+        }));
+        
+        setMessages(loadedMessages);
+        setShowSessionPicker(false);
+        showToast({ type: "success", message: `Loaded session: "${data.title}"` });
+      } else {
+        showToast({ type: "error", message: `Failed to load session: ${data.error || "Unknown error"}` });
+      }
+    } catch (error) {
+      showToast({ type: "error", message: "Network error while loading session" });
+      console.error(error);
+    } finally {
+      setIsLoadingSession(false);
+    }
+  };
+
+  // Manually save current session
+  const saveSession = async () => {
+    if (messages.length === 0) {
+      showToast({ type: "warning", message: "No messages to save" });
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: messages.map(msg => ({
+            role: msg.role,
+            content: msg.content,
+            timestamp: msg.timestamp.toISOString(),
+          })),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        showToast({ type: "success", message: `Session saved: "${data.title}"` });
+        
+        // Refresh sessions list
+        const refreshRes = await fetch("/api/sessions");
+        const refreshData = await refreshRes.json();
+        if (Array.isArray(refreshData)) {
+          setSessions(refreshData.slice(0, 20));
+        }
+      } else {
+        showToast({ type: "error", message: `Failed to save session: ${data.error}` });
+      }
+    } catch (error) {
+      showToast({ type: "error", message: "Network error while saving session" });
+      console.error(error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,6 +266,38 @@ export default function ChatPage() {
       {/* Messages Container */}
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-4xl px-4 py-6">
+          {/* Schema Age Warning */}
+          {showSchemaWarning && schemaAge !== null && (
+            <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50 p-4 shadow-md dark:border-amber-700 dark:bg-amber-950">
+              <div className="flex items-start gap-3">
+                <div className="text-2xl">⚠️</div>
+                <div className="flex-1">
+                  <h3 className="mb-1 font-semibold text-amber-900 dark:text-amber-100">
+                    Schema Cache Outdated
+                  </h3>
+                  <p className="mb-3 text-sm text-amber-800 dark:text-amber-200">
+                    Database schema is {Math.floor(schemaAge / 24)} days old. 
+                    Refresh recommended for accurate AI responses.
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={refreshSchema}
+                      className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-amber-700"
+                    >
+                      🔄 Refresh Now
+                    </button>
+                    <button
+                      onClick={() => setShowSchemaWarning(false)}
+                      className="rounded-lg border border-amber-300 bg-white px-4 py-2 text-sm font-medium text-amber-900 shadow-sm transition hover:bg-amber-50 dark:border-amber-700 dark:bg-zinc-900 dark:text-amber-100 dark:hover:bg-zinc-800"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
           {messages.length === 0 ? (
             <div className="flex h-full items-center justify-center">
                 <div className="text-center">
@@ -286,6 +475,80 @@ export default function ChatPage() {
 
         {/* Input Form */}
         <div className="border-t border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-900">
+          {/* Session Management */}
+          {(sessions.length > 0 || messages.length > 0) && (
+            <div className="mx-auto mb-3 max-w-4xl">
+              <div className="flex gap-2">
+                {/* Load Session Picker */}
+                {sessions.length > 0 && (
+                  <div className="flex-1">
+                    <button
+                      onClick={() => setShowSessionPicker(!showSessionPicker)}
+                      className="flex w-full items-center justify-between rounded-lg border border-zinc-300 bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                    >
+                      <span className="flex items-center gap-2">
+                        📁 Load Previous Session
+                        {isLoadingSession && (
+                          <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                        )}
+                      </span>
+                      <svg
+                        className={`h-5 w-5 transition-transform ${showSessionPicker ? "rotate-180" : ""}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+
+                {/* Save Session Button */}
+                {messages.length > 0 && (
+                  <button
+                    onClick={saveSession}
+                    className="flex items-center gap-2 rounded-lg border border-zinc-300 bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-green-600 hover:to-emerald-600"
+                  >
+                    💾 Save
+                  </button>
+                )}
+              </div>
+
+              {/* Session Picker Dropdown */}
+              {showSessionPicker && sessions.length > 0 && (
+                  <div className="mt-2 max-h-60 overflow-y-auto rounded-lg border border-zinc-300 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-800">
+                    {sessions.map((session) => (
+                      <button
+                        key={session.id}
+                        onClick={() => loadSession(session.id)}
+                        disabled={isLoadingSession}
+                        className="flex w-full items-start gap-3 border-b border-zinc-200 px-4 py-3 text-left transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-700"
+                      >
+                        <div className="text-xl">💬</div>
+                        <div className="flex-1 min-w-0">
+                          <p className="truncate font-medium text-zinc-900 dark:text-zinc-100">
+                            {session.title}
+                          </p>
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                            {new Date(session.created).toLocaleString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+            </div>
+          )}
+
           <form
             onSubmit={handleSubmit}
             className="mx-auto flex max-w-4xl items-end gap-3"

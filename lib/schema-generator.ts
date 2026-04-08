@@ -208,6 +208,9 @@ function formatSchemaAsMarkdown(schemaInfo: SchemaInfo): string {
  */
 function parseMCPResult(result: unknown): Record<string, unknown>[] {
   try {
+    // 🔥 DEBUG: Log raw MCP response
+    console.log("[Schema] Raw MCP result:", JSON.stringify(result, null, 2));
+
     const mcpData = result as {
       result?: {
         content?: Array<{ type: string; text?: string }>;
@@ -218,15 +221,30 @@ function parseMCPResult(result: unknown): Record<string, unknown>[] {
       (c) => c.type === "text"
     )?.text;
 
+    console.log("[Schema] Extracted text content:", textContent);
+
     if (!textContent) {
+      console.error("[Schema] No text content found in MCP response");
       return [];
     }
 
-    // Parse JSON array
+    // Parse JSON
     const parsed = JSON.parse(textContent);
+    console.log("[Schema] Parsed data:", parsed);
+
+    // 🔥 Handle new MCP format: {success: true, data: [...]}
+    if (parsed && typeof parsed === "object") {
+      if (parsed.success && Array.isArray(parsed.data)) {
+        console.log(`[Schema] Extracted ${parsed.data.length} rows from MCP wrapper`);
+        return parsed.data;
+      }
+    }
+
+    // Fallback: direct array
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
     console.error("[Schema] Failed to parse MCP result:", error);
+    console.error("[Schema] Result was:", result);
     return [];
   }
 }

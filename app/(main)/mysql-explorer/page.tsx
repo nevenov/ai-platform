@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
+import { useToast } from "@/components/ToastContext";
 
 /* 1) Icons */
 function StructureIcon(props: any) {
@@ -406,6 +407,7 @@ function QueryTab({
 
 /* 7) MAIN COMPONENT */
 export default function MySQLExplorerPage() {
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<"structure" | "describe" | "query">(
     "structure"
   );
@@ -414,6 +416,8 @@ export default function MySQLExplorerPage() {
   const [tables, setTables] = useState<string[]>([]);
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [describeData, setDescribeData] = useState<any>(null);
+  const [isRefreshingSchema, setIsRefreshingSchema] = useState(false);
+  const [schemaStatus, setSchemaStatus] = useState<{age: number | null; needsRefresh: boolean} | null>(null);
 
   const [sql, setSql] = useState("");
   const [queryResult, setQueryResult] = useState<any>(null);
@@ -430,6 +434,43 @@ export default function MySQLExplorerPage() {
     const data = await res.json();
     setTables(data.tables || []);
   }
+
+  async function checkSchemaStatus() {
+    try {
+      const res = await fetch("/api/schema/status");
+      const data = await res.json();
+      setSchemaStatus({
+        age: data.ageHours,
+        needsRefresh: data.needsRefresh
+      });
+    } catch (error) {
+      console.error("Failed to check schema status:", error);
+    }
+  }
+
+  async function refreshSchema() {
+    setIsRefreshingSchema(true);
+    try {
+      const res = await fetch("/api/schema/generate", { method: "POST" });
+      const data = await res.json();
+      
+      if (data.success) {
+        showToast({ type: "success", message: `Schema refreshed! ${data.data.tableCount} tables, ${data.data.totalColumns} columns` });
+        await checkSchemaStatus();
+      } else {
+        showToast({ type: "error", message: `Schema refresh failed: ${data.error}` });
+      }
+    } catch (error) {
+      showToast({ type: "error", message: `Schema refresh error: ${error}` });
+    } finally {
+      setIsRefreshingSchema(false);
+    }
+  }
+
+  // Check schema status on mount
+  useEffect(() => {
+    checkSchemaStatus();
+  }, []);
 
   async function describeTable(name: string) {
     setSelectedTable(name);
@@ -479,6 +520,21 @@ export default function MySQLExplorerPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
               </svg>
               Load Tables
+            </button>
+            <button
+              onClick={refreshSchema}
+              disabled={isRefreshingSchema}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium shadow-sm transition ${
+                schemaStatus?.needsRefresh
+                  ? "bg-amber-600 hover:bg-amber-700 text-white"
+                  : "bg-purple-600 hover:bg-purple-700 text-white"
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+              title={schemaStatus?.age ? `Schema is ${Math.floor(schemaStatus.age / 24)} days old` : "Refresh schema cache"}
+            >
+              <svg className={`h-4 w-4 ${isRefreshingSchema ? "animate-spin" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              {isRefreshingSchema ? "Refreshing..." : "Refresh Schema"}
             </button>
             {status && (
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm font-medium">

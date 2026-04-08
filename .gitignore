@@ -41,8 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 # AI setup and session history (private, local only)
-.md-setup/*
-!.md-setup/.gitkeep
-!.md-setup/*/
-!.md-setup/*/.gitkeep
+.md-setup/primary/*.md
+.md-setup/sessions/*.md
+!.md-setup/primary/project-context.md
 !.md-setup/README.md
