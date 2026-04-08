@@ -1,36 +1,266 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SimpleAI WebAdmin
 
-## Getting Started
+**Universal AI-powered control panel for managing databases, websites, and digital operations through natural language.**
 
-First, run the development server:
+A modern Next.js application that combines AI capabilities (Claude API) with database management (MySQL via MCP) to provide an intelligent interface for any MySQL database.
+
+---
+
+## 🎯 Features
+
+### ✅ AI Chat Interface
+- Natural language queries to your database
+- Multi-round tool calling (up to 10 rounds)
+- Automatic schema discovery and error recovery
+- Business intelligence insights and data analysis
+- Markdown-formatted results with tables
+
+### ✅ MySQL Explorer
+- Browse database tables and schemas
+- SQL query editor with syntax highlighting (Monaco Editor)
+- Execute queries with real-time results
+- Table structure inspection (DESCRIBE, SHOW)
+- Connection status monitoring
+
+### ✅ Professional Dashboard
+- Real-time system status monitoring
+- Quick action cards
+- Connection health indicators
+- Recent activity tracking
+- Dark mode support
+
+### ✅ Security First
+- SQL query validation (read-only mode)
+- Whitelist: `SELECT`, `SHOW`, `DESCRIBE`, `EXPLAIN`
+- Blocked: `DROP`, `DELETE`, `UPDATE`, `ALTER`, `INSERT`
+- Safe for production use
+
+---
+
+## 🚀 Quick Start
+
+### 1. Prerequisites
+- Node.js 18+ 
+- MySQL database (local or remote)
+- Anthropic API key ([get one here](https://console.anthropic.com))
+
+### 2. Installation
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd ai-platform
+
+# Install dependencies
+npm install
+```
+
+### 3. Configuration
+
+Create `.env.local` in the project root:
+
+```env
+# Anthropic API Key (required)
+ANTHROPIC_API_KEY=sk-ant-api03-...
+
+# MySQL Connection (update with your credentials)
+MYSQL_HOST=127.0.0.1
+MYSQL_PORT=3306
+MYSQL_USER=your_username
+MYSQL_PASSWORD=your_password
+MYSQL_DATABASE=your_database
+```
+
+**Note:** `.env.local` is git-ignored by default and will not be committed.
+
+### 4. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📁 Project Structure
 
-## Learn More
+```
+app/
+├── (main)/              # Main app with sidebar
+│   ├── dashboard/       # Main dashboard
+│   ├── chat/           # AI chat interface
+│   ├── mysql-explorer/ # Database explorer
+│   └── modules/        # Additional modules
+├── api/
+│   ├── chat/           # AI orchestration endpoint
+│   ├── health/         # Health check
+│   ├── status/         # System status
+│   └── mcp/mysql/      # MySQL MCP proxy
+└── layout.tsx          # Root layout
 
-To learn more about Next.js, take a look at the following resources:
+components/
+├── Sidebar.tsx          # Navigation sidebar
+├── ThemeToggle.tsx      # Light/dark mode switcher
+├── ToastContainer.tsx   # Toast notifications
+└── ConnectionStatus.tsx # Connection indicators
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+lib/
+├── ai.ts               # Claude API client
+├── mcp.ts              # MCP (Model Context Protocol) client
+├── sql.ts              # SQL execution layer
+├── safety.ts           # SQL query validation
+├── format.ts           # Result formatting
+└── tool-orchestration.ts # Multi-round tool calling
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed architecture documentation.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🎨 Tech Stack
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Framework:** Next.js 16.2.1 (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS v3
+- **AI:** Claude API (Anthropic)
+- **Database:** MySQL via MCP Server
+- **Editor:** Monaco Editor
+- **Theme:** next-themes (dark mode)
+
+---
+
+## 💬 Usage Examples
+
+### AI Chat Queries
+
+Try these natural language queries in the `/chat` interface:
+
+```
+"Show me all tables in the database"
+"What's the structure of the users table?"
+"Show me the top 10 records ordered by date"
+"Compare counts by category and status"
+"Show me distribution of records by year"
+```
+
+The AI will automatically:
+1. Explore your database schema
+2. Generate appropriate SQL queries
+3. Execute with safety validation
+4. Format results as readable tables
+5. Provide business insights
+
+### SQL Explorer
+
+Use the `/mysql-explorer` page to:
+- Browse all tables
+- Click to describe table structure
+- Write custom SQL queries
+- View formatted results
+
+---
+
+## 🔒 Security & Safety
+
+### SQL Query Validation
+All queries pass through `lib/safety.ts` which enforces:
+- ✅ **Allowed:** `SELECT`, `SHOW`, `DESCRIBE`, `EXPLAIN`
+- ❌ **Blocked:** `DROP`, `DELETE`, `UPDATE`, `ALTER`, `INSERT`, `TRUNCATE`, `CREATE`
+
+### Environment Variables
+Never commit sensitive data:
+- Use `.env.local` for secrets
+- `.env.example` for template (no real credentials)
+- API keys, passwords protected
+
+---
+
+## 🛠️ Development
+
+### File Size Convention
+All files kept under 200-300 lines for maintainability:
+- Modular architecture
+- Single responsibility principle
+- Easy to navigate and debug
+
+### Adding New Features
+
+**New Dashboard Widget:**
+- Edit `app/(main)/dashboard/page.tsx`
+- Follow design system (zinc colors, dark mode)
+
+**New Sidebar Link:**
+- Update `components/Sidebar.tsx`
+- Create page in `app/(main)/your-page/page.tsx`
+
+**New API Endpoint:**
+- Create in `app/api/your-endpoint/route.ts`
+
+See [AGENTS.md](./AGENTS.md) for AI coding guidelines.
+
+---
+
+## 📚 Documentation
+
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Technical architecture details
+- **[AGENTS.md](./AGENTS.md)** - AI agent guidelines and conventions
+
+---
+
+## 🎯 Roadmap
+
+**Completed (v1.0):**
+- ✅ AI Chat with Claude integration
+- ✅ MySQL Explorer with MCP server
+- ✅ Dashboard with real-time monitoring
+- ✅ Dark mode support
+- ✅ Toast notifications
+- ✅ Connection status indicators
+
+**Planned Features:**
+- 🔄 Streaming AI responses (SSE)
+- 📊 Charts & visualizations
+- 📤 Export to CSV/Excel
+- 💾 Conversation persistence
+- 🔐 User authentication
+- 🌐 Web scraping module
+- 📧 Email automation module
+- 📈 GA4 analytics module
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+## 🆘 Troubleshooting
+
+**MCP Connection Issues:**
+- Verify MySQL credentials in `.env.local`
+- Check MySQL server is running
+- Test connection in MySQL Explorer
+
+**API Key Errors:**
+- Verify `ANTHROPIC_API_KEY` in `.env.local`
+- Check API key is valid at [console.anthropic.com](https://console.anthropic.com)
+
+**Build Errors:**
+- Run `npm install` to ensure dependencies are installed
+- Delete `.next` folder and rebuild
+
+---
+
+**Questions?** Open an issue or check the documentation files!
