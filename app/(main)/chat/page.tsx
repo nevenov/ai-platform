@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -26,6 +26,8 @@ export default function ChatPage() {
   const [showSchemaWarning, setShowSchemaWarning] = useState(false);
 
   // Session management
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [sessions, setSessions] = useState<{ id: string; title: string; created: string }[]>([]);
   const [isLoadingSession, setIsLoadingSession] = useState(false);
   const [showSessionPicker, setShowSessionPicker] = useState(false);
@@ -76,10 +78,11 @@ export default function ChatPage() {
 
   // Auto-save session before unload
   useEffect(() => {
-    const handleBeforeUnload = async () => {
+    const handleBeforeUnload = () => {
       if (messages.length > 0) {
         // Save session using navigator.sendBeacon for reliability
         const sessionData = JSON.stringify({
+          sessionId: currentSessionId,
           messages: messages.map(msg => ({
             role: msg.role,
             content: msg.content,
@@ -94,7 +97,7 @@ export default function ChatPage() {
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [messages]);
+  }, [messages, currentSessionId]);
 
   // Auto-submit query from URL parameter
   useEffect(() => {
@@ -147,6 +150,8 @@ export default function ChatPage() {
         }));
         
         setMessages(loadedMessages);
+        setCurrentSessionId(sessionId);
+        setLastSaved(new Date());
         setShowSessionPicker(false);
         showToast({ type: "success", message: `Loaded session: "${data.title}"` });
       } else {
@@ -160,10 +165,18 @@ export default function ChatPage() {
     }
   };
 
-  // Manually save current session
-  const saveSession = async () => {
+  // Start a new chat session
+  const newChat = () => {
+    setMessages([]);
+    setCurrentSessionId(null);
+    setLastSaved(null);
+    setInput("");
+    showToast({ type: "info", message: "Started new chat" });
+  };
+
+  // Auto-save current session
+  const saveSession = useCallback(async () => {
     if (messages.length === 0) {
-      showToast({ type: "warning", message: "No messages to save" });
       return;
     }
 
@@ -172,6 +185,7 @@ export default function ChatPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          sessionId: currentSessionId, // Include existing session ID if available
           messages: messages.map(msg => ({
             role: msg.role,
             content: msg.content,
@@ -183,8 +197,12 @@ export default function ChatPage() {
       const data = await res.json();
 
       if (res.ok) {
-        const sessionTitle = data.title || "New Session";
-        showToast({ type: "success", message: `Session saved: "${sessionTitle}"` });
+        // Set session ID if this was the first save
+        if (!currentSessionId) {
+          setCurrentSessionId(data.sessionId);
+        }
+        
+        setLastSaved(new Date());
         
         // Refresh sessions list
         const refreshRes = await fetch("/api/sessions");
@@ -192,14 +210,22 @@ export default function ChatPage() {
         if (Array.isArray(refreshData)) {
           setSessions(refreshData.slice(0, 20));
         }
-      } else {
-        showToast({ type: "error", message: `Failed to save session: ${data.error}` });
       }
     } catch (error) {
-      showToast({ type: "error", message: "Network error while saving session" });
-      console.error(error);
+      console.error("Auto-save error:", error);
     }
-  };
+  }, [messages, currentSessionId]);
+
+  // Auto-save session periodically (30 seconds after last change)
+  useEffect(() => {
+    if (messages.length === 0) return;
+
+    const timeout = setTimeout(() => {
+      saveSession();
+    }, 30000); // 30 seconds
+
+    return () => clearTimeout(timeout);
+  }, [messages, saveSession]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -508,16 +534,23 @@ export default function ChatPage() {
                   </div>
                 )}
 
-                {/* Save Session Button */}
+                {/* New Chat Button */}
                 {messages.length > 0 && (
                   <button
-                    onClick={saveSession}
-                    className="flex items-center gap-2 rounded-lg border border-zinc-300 bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-green-600 hover:to-emerald-600"
+                    onClick={newChat}
+                    className="flex items-center gap-2 rounded-lg border border-zinc-300 bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-blue-600 hover:to-cyan-600"
                   >
-                    💾 Save
+                    ✨ New Chat
                   </button>
                 )}
               </div>
+
+              {/* Last Saved Indicator */}
+              {lastSaved && (
+                <div className="mt-2 text-center text-xs text-zinc-500 dark:text-zinc-400">
+                  Auto-saved {Math.floor((Date.now() - lastSaved.getTime()) / 1000)}s ago
+                </div>
+              )}
 
               {/* Session Picker Dropdown */}
               {showSessionPicker && sessions.length > 0 && (

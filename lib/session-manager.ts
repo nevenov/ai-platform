@@ -56,6 +56,62 @@ export async function createSession(
 }
 
 /**
+ * Update an existing session with new messages
+ */
+export async function updateSession(
+  id: string,
+  messages: Message[],
+  customTitle?: string
+): Promise<boolean> {
+  try {
+    await fs.access(SESSIONS_DIR);
+  } catch {
+    return false;
+  }
+
+  // Find file with matching ID
+  const files = await fs.readdir(SESSIONS_DIR);
+  const matchingFile = files.find((f) => f.startsWith(`${id}_`));
+
+  if (!matchingFile) {
+    console.error(`[Session] Session ${id} not found for update`);
+    return false;
+  }
+
+  const oldFilePath = path.join(SESSIONS_DIR, matchingFile);
+
+  // Get title (use custom or keep existing from filename)
+  let title = customTitle;
+  if (!title) {
+    const metadata = parseSessionFilename(matchingFile);
+    title = metadata?.title || generateTitleFromFirstMessage(messages);
+  }
+
+  // Generate new filename (keep same ID, update slug if title changed)
+  const newFilename = `${id}_${slugify(title)}.md`;
+  const newFilePath = path.join(SESSIONS_DIR, newFilename);
+
+  // Get original creation timestamp
+  const oldContent = await fs.readFile(oldFilePath, "utf-8");
+  const createdMatch = oldContent.match(/\*\*Created:\*\* (.+)/);
+  const createdTimestamp = createdMatch ? new Date(createdMatch[1]) : new Date();
+
+  // Format with updated messages
+  const markdown = formatSessionAsMarkdown(title, createdTimestamp, messages);
+
+  // Save to file
+  await fs.writeFile(newFilePath, markdown, "utf-8");
+
+  // Delete old file if name changed
+  if (oldFilePath !== newFilePath) {
+    await fs.unlink(oldFilePath);
+  }
+
+  console.log(`[Session] Updated: ${newFilename}`);
+  return true;
+}
+
+/**
  * List all sessions (sorted by date, newest first)
  */
 export async function listSessions(): Promise<SessionMetadata[]> {
