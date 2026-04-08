@@ -1,0 +1,38 @@
+# Cursor AI Rules for SimpleAI WebAdmin
+
+Read and strictly follow guidelines in AGENTS.md before making any code changes.
+
+## Critical Rules
+
+1. Generic examples ONLY - use neutral terms: records, items, users, categories, data
+2. Dark mode MANDATORY - every component needs dark: classes
+3. Design system consistency:
+   - Colors: zinc palette + blue-purple gradients
+   - Spacing: gap-5/6/7, p-6/7/8, space-y-10
+   - Shadows: shadow-md/lg/xl (increase on hover)
+   - Border-radius: rounded-xl/2xl/3xl
+4. Responsive: test at sm:/lg:/xl: breakpoints
+5. Accessibility: semantic HTML, aria-labels, keyboard nav
+
+## File Patterns
+
+Dashboard widgets → app/(main)/dashboard/page.tsx
+Sidebar links → components/Sidebar.tsx  
+API routes → app/api/
+Components → components/
+Utils → lib/
+
+## Security
+
+SQL: Only SELECT/SHOW/DESCRIBE/EXPLAIN (validated in lib/safety.ts)
+Secrets: Use .env.local (never commit)
+
+## Before Submitting
+
+✓ Generic, neutral content only
+✓ Dark mode complete
+✓ Responsive design checked
+✓ No console errors
+✓ Matches design system
+
+See AGENTS.md for full guidelines.

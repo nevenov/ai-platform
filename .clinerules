@@ -1,0 +1,31 @@
+# Cline Rules for SimpleAI WebAdmin
+
+@AGENTS.md - Read project guidelines before making changes
+
+## Quick Reference
+
+### Design System
+- Colors: zinc palette (50-950) + blue/purple gradients
+- Spacing: Container space-y-10, Grids gap-5/6/7, Cards p-6/7/8
+- Shadows: md (default) → lg (hover) → xl (active)
+- Border-radius: xl (small) / 2xl (cards) / 3xl (hero)
+
+### Critical Rules
+1. Generic examples ONLY - use neutral terms like records, items, users, categories
+2. Dark mode support MANDATORY (dark:bg-*, dark:text-*, etc)
+3. Responsive design (sm:/lg:/xl: breakpoints)
+4. SQL security (only SELECT/SHOW/DESCRIBE/EXPLAIN)
+
+### Common Patterns
+- Dashboard widget: rounded-2xl, border, bg-white, p-7, shadow-md, dark:bg-zinc-900
+- Toast: useToast() from ToastContext, types: success/error/warning/info
+- Connection: <ConnectionStatus type="mysql|api|system" />
+
+### File Locations
+- Dashboard: app/(main)/dashboard/page.tsx
+- Sidebar: components/Sidebar.tsx
+- API: app/api/
+- Components: components/
+- Utils: lib/
+
+For detailed guidelines, see AGENTS.md
