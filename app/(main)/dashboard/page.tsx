@@ -225,22 +225,22 @@ export default function DashboardPage() {
           {/* Quick Prompts */}
           <div className="mb-4 flex flex-wrap gap-2">
             <a
-              href="/chat?q=Show me total patients"
+              href="/chat?q=Show all tables"
               className="rounded-xl bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-md transition-all hover:scale-105 hover:shadow-lg hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:from-purple-900/20 dark:hover:to-blue-900/20"
             >
-              💊 Total patients
+              📋 Show tables
             </a>
             <a
-              href="/chat?q=Top 5 clinics by patients"
+              href="/chat?q=Count records in the largest table"
               className="rounded-xl bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-md transition-all hover:scale-105 hover:shadow-lg hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:from-purple-900/20 dark:hover:to-blue-900/20"
             >
-              🏥 Top clinics
+              📊 Count records
             </a>
             <a
-              href="/chat?q=Compare patients by gender"
+              href="/chat?q=Describe the first table"
               className="rounded-xl bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-md transition-all hover:scale-105 hover:shadow-lg hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:from-purple-900/20 dark:hover:to-blue-900/20"
             >
-              📊 Gender analysis
+              🔍 Table structure
             </a>
           </div>
 
@@ -322,7 +322,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-zinc-900 dark:text-white">AI Query executed</p>
-                  <p className="text-xs text-zinc-600 dark:text-zinc-400">Show me total patients by clinic</p>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">Count records grouped by category</p>
                   <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-500">2 hours ago</p>
                 </div>
               </div>
@@ -336,7 +336,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-zinc-900 dark:text-white">Database explored</p>
-                  <p className="text-xs text-zinc-600 dark:text-zinc-400">Viewed patients table structure</p>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">Analyzed table schema</p>
                   <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-500">5 hours ago</p>
                 </div>
               </div>

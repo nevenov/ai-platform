@@ -159,10 +159,10 @@ export class ClaudeClient {
       "2. **Minimize schema checks** - Only use DESCRIBE/SHOW TABLES if a query fails\n" +
       "3. **Use simple SQL** - Avoid complex JOINs/CASE when a simple SELECT works\n" +
       "4. **Common column patterns:**\n" +
-      "   - Dates: date_of_birth, created_at, updated_at\n" +
-      "   - IDs: id, patient_id, clinic_id, provider_id\n" +
-      "   - Names: first_name, last_name, name\n" +
-      "   - Foreign keys usually match table names: clinic_id → clinic table\n" +
+      "   - Dates: created_at, updated_at, date, timestamp\n" +
+      "   - IDs: id, user_id, customer_id, item_id, category_id\n" +
+      "   - Names: name, first_name, last_name, title\n" +
+      "   - Foreign keys usually match table names: category_id → category table\n" +
       "5. **Recovery strategy:** If 0 rows on WHERE clause, then DESCRIBE to verify columns\n" +
       "\n📊 Format results with clear markdown tables and concise analysis.";
 

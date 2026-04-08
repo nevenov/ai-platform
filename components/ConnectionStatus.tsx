@@ -119,7 +119,9 @@ export default function ConnectionStatus({
 
       {/* Tooltip on hover */}
       <div className="pointer-events-none absolute -top-10 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-lg bg-zinc-900 px-3 py-1.5 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 dark:bg-zinc-700">
-        Last checked: {lastCheck.toLocaleTimeString()}
+        <span suppressHydrationWarning>
+          Last checked: {lastCheck.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+        </span>
         <div className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-zinc-900 dark:bg-zinc-700" />
       </div>
     </div>
