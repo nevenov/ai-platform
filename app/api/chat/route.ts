@@ -4,6 +4,7 @@ import {
   executeToolsAndFormatResults,
   type ClaudeMessage,
 } from "@/lib/tool-orchestration";
+import { loadPrimarySetup } from "@/lib/setup-loader";
 
 interface Message {
   role: "user" | "assistant";
@@ -29,6 +30,34 @@ export async function POST(request: NextRequest) {
 
     console.log("[Chat] Processing message:", message.slice(0, 100));
 
+    // Load primary setup files (db-schema.md, project-context.md, etc.)
+    const setupContent = await loadPrimarySetup();
+    
+    // Build system prompt with setup content
+    const baseSystemPrompt =
+      "You are a helpful AI assistant with access to a MySQL database. " +
+      "When users ask questions about data, use the execute_sql_query tool efficiently. " +
+      "\n\n🎯 OPTIMIZATION RULES (CRITICAL):\n" +
+      "1. **Make educated guesses** - Try the query directly first with common column names\n" +
+      "2. **Minimize schema checks** - Only use DESCRIBE/SHOW TABLES if a query fails\n" +
+      "3. **Use simple SQL** - Avoid complex JOINs/CASE when a simple SELECT works\n" +
+      "4. **Common column patterns:**\n" +
+      "   - Dates: created_at, updated_at, date, timestamp\n" +
+      "   - IDs: id, user_id, customer_id, item_id, category_id\n" +
+      "   - Names: name, first_name, last_name, title\n" +
+      "   - Foreign keys usually match table names: category_id → category table\n" +
+      "5. **Recovery strategy:** If 0 rows on WHERE clause, then DESCRIBE to verify columns\n" +
+      "\n📊 Format results with clear markdown tables and concise analysis.";
+
+    // Prepend setup content to system prompt
+    const systemPrompt = setupContent 
+      ? `${setupContent}\n\n---\n\n${baseSystemPrompt}`
+      : baseSystemPrompt;
+
+    if (setupContent) {
+      console.log(`[Chat] Loaded setup content: ${setupContent.length} chars`);
+    }
+
     // Get AI client
     const aiClient = getAIClient();
 
@@ -50,7 +79,7 @@ export async function POST(request: NextRequest) {
     // Step 1: Send initial message to Claude (use Haiku)
     let aiResponse = await aiClient.chatWithTools(
       currentMessages,
-      undefined,
+      systemPrompt,
       haikuModel
     );
     console.log("[Chat] AI stop reason:", aiResponse.stopReason);
@@ -99,7 +128,7 @@ export async function POST(request: NextRequest) {
       // Get next response from Claude (adaptive model)
       aiResponse = await aiClient.chatWithTools(
         currentMessages,
-        undefined,
+        systemPrompt,
         currentModel
       );
       console.log(`[Chat] Round ${round} stop reason:`, aiResponse.stopReason);
