@@ -40,6 +40,8 @@ export async function createSession(
   const filename = `${id}_${slugify(title)}.md`;
   const filePath = path.join(SESSIONS_DIR, filename);
 
+  console.log(`[Session] Creating session with ${messages.length} messages, title: "${title}"`);
+
   // Format session as Markdown
   const markdown = formatSessionAsMarkdown(title, timestamp, messages);
 
@@ -254,7 +256,12 @@ function parseSessionMarkdown(markdown: string): { title: string; messages: Mess
   let title = "Untitled Session";
   const titleMatch = lines[0]?.match(/^# Chat Session: (.+)$/);
   if (titleMatch) {
-    title = titleMatch[1];
+    title = titleMatch[1].trim();
+    
+    // Handle empty or whitespace-only titles
+    if (!title || title === "") {
+      title = "Untitled Session";
+    }
   }
 
   let currentMessage: Partial<Message> | null = null;
@@ -309,7 +316,14 @@ function parseSessionFilename(filename: string): SessionMetadata | null {
   }
 
   const [, timestampStr, titleSlug] = match;
-  const title = titleSlug.replace(/-/g, " ");
+  
+  // Convert slug back to title (replace hyphens with spaces)
+  let title = titleSlug.replace(/-/g, " ").trim();
+  
+  // Handle empty or underscore-only slugs
+  if (!title || title === "_" || title === "") {
+    title = "Untitled Session";
+  }
 
   // Parse timestamp (YYYY-MM-DD-HH-MM)
   const [year, month, day, hour, minute] = timestampStr.split("-").map(Number);
@@ -331,12 +345,17 @@ function generateTitleFromFirstMessage(messages: Message[]): string {
   const firstUserMessage = messages.find((m) => m.role === "user");
 
   if (!firstUserMessage) {
+    console.warn("[Session] No user message found for title generation");
     return "New Session";
   }
 
   // Take first 5 words
   const words = firstUserMessage.content.trim().split(/\s+/).slice(0, 5);
-  return words.join(" ");
+  const title = words.join(" ");
+  
+  console.log("[Session] Generated title:", title, "from message:", firstUserMessage.content.substring(0, 50));
+  
+  return title || "New Session";
 }
 
 /**
@@ -356,11 +375,15 @@ function formatTimestamp(date: Date): string {
  * Slugify string for filename (lowercase, hyphens, alphanumeric)
  */
 function slugify(text: string): string {
-  return text
+  const slug = text
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s-]/g, "") // Remove special chars
+    // Keep Unicode letters (including Cyrillic), numbers, spaces, and hyphens
+    .replace(/[^\p{L}\p{N}\s-]/gu, "") // Use Unicode-aware regex
     .replace(/\s+/g, "-") // Replace spaces with hyphens
     .replace(/-+/g, "-") // Replace multiple hyphens with single
     .slice(0, 50); // Limit length
+  
+  // Return 'untitled' if slug is empty
+  return slug || "untitled";
 }

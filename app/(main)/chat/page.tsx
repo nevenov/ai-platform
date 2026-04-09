@@ -66,8 +66,13 @@ export default function ChatPage() {
         const res = await fetch("/api/sessions");
         const data = await res.json();
         
+        console.log("[Chat] Loading sessions:", data);
+        
         if (Array.isArray(data)) {
           setSessions(data.slice(0, 20)); // Show last 20 sessions
+          console.log("[Chat] Sessions loaded:", data.length);
+        } else {
+          console.error("[Chat] Sessions data is not an array:", data);
         }
       } catch (error) {
         console.error("Failed to load sessions:", error);
@@ -153,6 +158,14 @@ export default function ChatPage() {
         setCurrentSessionId(sessionId);
         setLastSaved(new Date());
         setShowSessionPicker(false);
+        
+        // Refresh sessions list after load
+        const refreshRes = await fetch("/api/sessions");
+        const refreshData = await refreshRes.json();
+        if (Array.isArray(refreshData)) {
+          setSessions(refreshData.slice(0, 20));
+        }
+        
         showToast({ type: "success", message: `Loaded session: "${data.title}"` });
       } else {
         showToast({ type: "error", message: `Failed to load session: ${data.error || "Unknown error"}` });
@@ -166,7 +179,12 @@ export default function ChatPage() {
   };
 
   // Start a new chat session
-  const newChat = () => {
+  const newChat = async () => {
+    // Save current session before clearing
+    if (messages.length > 0) {
+      await saveSession();
+    }
+    
     setMessages([]);
     setCurrentSessionId(null);
     setLastSaved(null);
@@ -216,13 +234,13 @@ export default function ChatPage() {
     }
   }, [messages, currentSessionId]);
 
-  // Auto-save session periodically (30 seconds after last change)
+  // Auto-save session periodically (5 seconds after last change)
   useEffect(() => {
     if (messages.length === 0) return;
 
     const timeout = setTimeout(() => {
       saveSession();
-    }, 30000); // 30 seconds
+    }, 5000); // 5 seconds (faster saves)
 
     return () => clearTimeout(timeout);
   }, [messages, saveSession]);
@@ -265,6 +283,9 @@ export default function ChatPage() {
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, assistantMessage]);
+        
+        // Save immediately after AI response
+        setTimeout(() => saveSession(), 1000);
       } else {
         // Error handling
         const errorMessage: Message = {
@@ -503,57 +524,56 @@ export default function ChatPage() {
         {/* Input Form */}
         <div className="border-t border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-900">
           {/* Session Management */}
-          {(sessions.length > 0 || messages.length > 0) && (
-            <div className="mx-auto mb-3 max-w-4xl">
-              <div className="flex gap-2">
-                {/* Load Session Picker */}
-                {sessions.length > 0 && (
-                  <div className="flex-1">
-                    <button
-                      onClick={() => setShowSessionPicker(!showSessionPicker)}
-                      className="flex w-full items-center justify-between rounded-lg border border-zinc-300 bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-                    >
-                      <span className="flex items-center gap-2">
-                        📁 Load Previous Session
-                        {isLoadingSession && (
-                          <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                          </svg>
-                        )}
-                      </span>
-                      <svg
-                        className={`h-5 w-5 transition-transform ${showSessionPicker ? "rotate-180" : ""}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                  </div>
-                )}
-
-                {/* New Chat Button */}
-                {messages.length > 0 && (
+          <div className="mx-auto mb-3 max-w-4xl">
+            <div className="flex gap-2">
+              {/* Load Session Picker */}
+              {sessions.length > 0 && (
+                <div className="flex-1">
                   <button
-                    onClick={newChat}
-                    className="flex items-center gap-2 rounded-lg border border-zinc-300 bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-blue-600 hover:to-cyan-600"
+                    onClick={() => setShowSessionPicker(!showSessionPicker)}
+                    className="flex w-full items-center justify-between rounded-lg border border-zinc-300 bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
                   >
-                    ✨ New Chat
+                    <span className="flex items-center gap-2">
+                      📁 Load Previous Session
+                      {isLoadingSession && (
+                        <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                      )}
+                    </span>
+                    <svg
+                      className={`h-5 w-5 transition-transform ${showSessionPicker ? "rotate-180" : ""}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
                   </button>
-                )}
-              </div>
-
-              {/* Last Saved Indicator */}
-              {lastSaved && (
-                <div className="mt-2 text-center text-xs text-zinc-500 dark:text-zinc-400">
-                  Auto-saved {Math.floor((Date.now() - lastSaved.getTime()) / 1000)}s ago
                 </div>
               )}
 
-              {/* Session Picker Dropdown */}
-              {showSessionPicker && sessions.length > 0 && (
+              {/* New Chat Button */}
+              {messages.length > 0 && (
+                <button
+                  onClick={newChat}
+                  className="flex items-center gap-2 rounded-lg border border-zinc-300 bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-blue-600 hover:to-cyan-600"
+                >
+                  ✨ New Chat
+                </button>
+              )}
+            </div>
+
+            {/* Last Saved Indicator */}
+            {lastSaved && (
+              <div className="mt-2 text-center text-xs text-zinc-500 dark:text-zinc-400">
+                Auto-saved {Math.floor((Date.now() - lastSaved.getTime()) / 1000)}s ago
+              </div>
+            )}
+
+            {/* Session Picker Dropdown */}
+            {showSessionPicker && sessions.length > 0 && (
                   <div className="mt-2 max-h-60 overflow-y-auto rounded-lg border border-zinc-300 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-800">
                     {sessions.map((session) => (
                       <button
@@ -581,7 +601,6 @@ export default function ChatPage() {
                   </div>
                 )}
             </div>
-          )}
 
           <form
             onSubmit={handleSubmit}
